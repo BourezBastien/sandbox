@@ -123,6 +123,12 @@ One tool doesn't touch the game at all:
   question is a new call once the answer is in. Never fold several questions
   into one, never offer an option you would rather they didn't pick, and never
   ask something read_file could have told you.
+  When the answers combine rather than compete - which features the world
+  should have, which systems to include - pass multiple: true: the player
+  checks every option they want and all of them apply. Use it to let a player
+  enrich the game ("saisons, animaux, marché" rather than one of the three),
+  and keep the default single choice for forks where one answer excludes the
+  others.
 
 Finish the work before you reply. The last thing you do in a turn is write the
 files, then describe what you changed - a reply that promises an edit you

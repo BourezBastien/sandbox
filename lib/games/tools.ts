@@ -86,11 +86,35 @@ const askPlayer = tool({
       .describe(
         "The answers to choose between. Each one a different game you would be happy to build - no filler option, and nothing that asks them to write the answer themselves."
       ),
+    multiple: z
+      .boolean()
+      .optional()
+      .describe(
+        [
+          "Pass true when the answers combine rather than compete: the player may check several options and every checked one applies.",
+          "Use it for enrichment questions - which features the world should have, which systems to include - and keep the default single choice for forks where one answer excludes the others.",
+        ].join(" ")
+      ),
   }),
-  outputSchema: z.object({
-    optionId: z.string().describe("The id of the option the player picked."),
-    label: z.string().describe("The label of the option the player picked."),
-  }),
+  // A union rather than one shape for both: a single-choice question resolves
+  // to the one picked option, a multiple-choice one to all checked options.
+  outputSchema: z.union([
+    z.object({
+      optionId: z.string().describe("The id of the option the player picked."),
+      label: z.string().describe("The label of the option the player picked."),
+    }),
+    z.object({
+      options: z
+        .array(
+          z.object({
+            optionId: z.string(),
+            label: z.string(),
+          })
+        )
+        .min(1)
+        .describe("Every option the player checked, in their order."),
+    }),
+  ]),
 })
 
 /**

@@ -26,6 +26,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { ChatComposer } from "@/components/chat-composer"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Bubble, BubbleContent } from "@/components/ui/bubble"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Button } from "@/components/ui/button"
 import { Marker, MarkerContent, MarkerIcon } from "@/components/ui/marker"
 import { Message, MessageAvatar, MessageContent } from "@/components/ui/message"
 import {
@@ -305,14 +307,31 @@ export function ChatThread({
                                   // older card is history and renders as such.
                                   onAnswer={
                                     message.id === lastMessage?.id
-                                      ? (option) =>
+                                      ? (options) =>
                                           void addToolOutput({
                                             tool: ASK_PLAYER,
                                             toolCallId: part.toolCallId,
-                                            output: {
-                                              optionId: option.id,
-                                              label: option.label,
-                                            },
+                                            // The output shape follows the
+                                            // question: one object for a
+                                            // single choice, the array for
+                                            // everything checked in a
+                                            // multiple - both are what the
+                                            // tool's outputSchema expects.
+                                            output:
+                                              options.length === 1 &&
+                                              !askPlayerMultiple(part.input)
+                                                ? {
+                                                    optionId: options[0].id,
+                                                    label: options[0].label,
+                                                  }
+                                                : {
+                                                    options: options.map(
+                                                      ({ id, label }) => ({
+                                                        optionId: id,
+                                                        label,
+                                                      })
+                                                    ),
+                                                  },
                                           })
                                       : undefined
                                   }
@@ -530,9 +549,13 @@ function AskPlayerCard({
   onAnswer,
 }: {
   part: ToolUIPart | DynamicToolUIPart
-  onAnswer?: (option: AskPlayerOption) => void
+  onAnswer?: (options: AskPlayerOption[]) => void
 }) {
   const asked = askPlayerInput(part.input)
+  // The running selection of a multiple-choice question. Lives here rather
+  // than in the form because a checkbox form has no single input to read on
+  // submit - the set is the source of truth the submit button reads.
+  const [checked, setChecked] = useState<Set<string>>(new Set())
 
   // Nothing to put to anyone until the whole question has arrived - the input
   // streams in a token at a time, and a call that failed outright never asked
@@ -548,6 +571,7 @@ function AskPlayerCard({
   const dimension = asked.dimension && ASK_DIMENSIONS[asked.dimension]
   const answered =
     part.state === "output-available" ? askPlayerAnswer(part.output) : undefined
+  const picked = asked.options.filter(({ id }) => checked.has(id))
 
   return (
     <div className="flex w-full max-w-md flex-col gap-3">
@@ -561,41 +585,109 @@ function AskPlayerCard({
       </Marker>
 
       {onAnswer && part.state === "input-available" ? (
-        <Questionnaire
-          shortcuts="letters"
-          onSubmit={(event) => {
-            // The primitive validates first and only calls this once an option
-            // is picked; without this the form would navigate the page.
-            event.preventDefault()
+        asked.multiple ? (
+          // The multi-select card: the questionnaire primitive is single
+          // choice by design, so a checkbox form is built here in the same
+          // visual language - bordered rows, label, one-line description -
+          // with the set above as its state and a submit that stays disabled
+          // until at least one box is checked.
+          <form
+            onSubmit={(event) => {
+              event.preventDefault()
 
-            const picked = new FormData(event.currentTarget).get(ASK_ITEM)
-            const option = asked.options.find(({ id }) => id === picked)
-
-            if (option) {
-              onAnswer(option)
-            }
-          }}
-        >
-          <QuestionnaireItem name={ASK_ITEM} required>
-            <QuestionnaireTitle>{asked.question}</QuestionnaireTitle>
-            <QuestionnaireChoices>
+              if (picked.length > 0) {
+                onAnswer(picked)
+              }
+            }}
+            className="flex flex-col gap-3"
+          >
+            <p className="font-heading text-base leading-snug font-medium text-pretty">
+              {asked.question}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Plusieurs réponses possibles : coche tout ce que tu veux.
+            </p>
+            <div className="flex flex-col gap-2">
               {asked.options.map((option) => (
-                <QuestionnaireChoice key={option.id} value={option.id}>
-                  {option.label}
-                  {option.description && (
-                    <QuestionnaireChoiceDescription>
-                      {option.description}
-                    </QuestionnaireChoiceDescription>
-                  )}
-                </QuestionnaireChoice>
+                <label
+                  key={option.id}
+                  className="flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/50 has-data-[checked]:border-primary"
+                >
+                  <Checkbox
+                    checked={checked.has(option.id)}
+                    onCheckedChange={(value) => {
+                      setChecked((current) => {
+                        const next = new Set(current)
+
+                        if (value) {
+                          next.add(option.id)
+                        } else {
+                          next.delete(option.id)
+                        }
+
+                        return next
+                      })
+                    }}
+                    className="mt-0.5"
+                  />
+                  <span className="flex flex-col gap-1">
+                    <span className="text-sm font-medium">{option.label}</span>
+                    {option.description && (
+                      <span className="text-xs text-muted-foreground">
+                        {option.description}
+                      </span>
+                    )}
+                  </span>
+                </label>
               ))}
-            </QuestionnaireChoices>
-            <QuestionnaireError />
-          </QuestionnaireItem>
-          <QuestionnaireActions>
-            <QuestionnaireSubmit size="sm">Construire ça</QuestionnaireSubmit>
-          </QuestionnaireActions>
-        </Questionnaire>
+            </div>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={picked.length === 0}
+              focusableWhenDisabled
+              className="self-start"
+            >
+              Construire ça{picked.length > 1 ? ` (${picked.length})` : ""}
+            </Button>
+          </form>
+        ) : (
+          <Questionnaire
+            shortcuts="letters"
+            onSubmit={(event) => {
+              // The primitive validates first and only calls this once an option
+              // is picked; without this the form would navigate the page.
+              event.preventDefault()
+
+              const pickedId = new FormData(event.currentTarget).get(ASK_ITEM)
+              const option = asked.options.find(({ id }) => id === pickedId)
+
+              if (option) {
+                onAnswer([option])
+              }
+            }}
+          >
+            <QuestionnaireItem name={ASK_ITEM} required>
+              <QuestionnaireTitle>{asked.question}</QuestionnaireTitle>
+              <QuestionnaireChoices>
+                {asked.options.map((option) => (
+                  <QuestionnaireChoice key={option.id} value={option.id}>
+                    {option.label}
+                    {option.description && (
+                      <QuestionnaireChoiceDescription>
+                        {option.description}
+                      </QuestionnaireChoiceDescription>
+                    )}
+                  </QuestionnaireChoice>
+                ))}
+              </QuestionnaireChoices>
+              <QuestionnaireError />
+            </QuestionnaireItem>
+            <QuestionnaireActions>
+              <QuestionnaireSubmit size="sm">Construire ça</QuestionnaireSubmit>
+            </QuestionnaireActions>
+          </Questionnaire>
+        )
       ) : (
         // Settled: the options were a way to answer, and once answered they
         // are noise. What stays is what was asked and what was picked.
@@ -633,15 +725,17 @@ function askPlayerInput(input: unknown): {
   dimension?: string
   question: string
   options: AskPlayerOption[]
+  multiple: boolean
 } | null {
   if (typeof input !== "object" || input === null) {
     return null
   }
 
-  const { dimension, question, options } = input as {
+  const { dimension, question, options, multiple } = input as {
     dimension?: unknown
     question?: unknown
     options?: unknown
+    multiple?: unknown
   }
 
   if (typeof question !== "string" || question === "") {
@@ -683,16 +777,46 @@ function askPlayerInput(input: unknown): {
     dimension: typeof dimension === "string" ? dimension : undefined,
     question,
     options: parsed,
+    multiple: multiple === true,
   }
 }
 
-/** The label of the option the player picked, out of the tool's output. */
+/** Whether a question lets several answers be checked at once. */
+function askPlayerMultiple(input: unknown): boolean {
+  return askPlayerInput(input)?.multiple ?? false
+}
+
+/**
+ * What the player picked, as a sentence: the one label of a single choice,
+ * every checked label of a multiple joined into one line.
+ */
 function askPlayerAnswer(output: unknown): string | undefined {
   if (typeof output !== "object" || output === null) {
     return undefined
   }
 
-  const { label } = output as { label?: unknown }
+  const { label, options } = output as {
+    label?: unknown
+    options?: unknown
+  }
+
+  if (Array.isArray(options)) {
+    const labels = options.flatMap((entry): string[] => {
+      if (typeof entry !== "object" || entry === null) {
+        return []
+      }
+
+      const entryLabel = (entry as { label?: unknown }).label
+
+      return typeof entryLabel === "string" && entryLabel !== ""
+        ? [entryLabel]
+        : []
+    })
+
+    if (labels.length > 0) {
+      return labels.join(", ")
+    }
+  }
 
   return typeof label === "string" && label !== "" ? label : undefined
 }
