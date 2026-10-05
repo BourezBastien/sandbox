@@ -21,7 +21,7 @@ import {
 import { truncateTitle } from "@/lib/games/title"
 import { describeError, elapsed } from "@/lib/observability"
 
-// The free tier of the catalog — naming a game is one short call, and paying
+// The free tier of the catalog - naming a game is one short call, and paying
 // tokens for it would be the only unavoidable cost in an otherwise free flow.
 const TITLE_MODEL = "glm-4.7-flash"
 
@@ -30,7 +30,7 @@ const TITLE_MODEL = "glm-4.7-flash"
  *
  * This runs before the composer can navigate anywhere, so it uses the cheapest,
  * fastest model available and falls back to the raw prompt if the model is slow,
- * unavailable, or returns nothing usable — a game with an awkward title beats a
+ * unavailable, or returns nothing usable - a game with an awkward title beats a
  * create that fails.
  */
 async function generateTitle(prompt: string) {
@@ -43,7 +43,7 @@ async function generateTitle(prompt: string) {
         "Tu nommes des jeux à partir du message qui les a créés. Réponds en " +
         "français, avec un titre d'au plus quatre mots avec une majuscule au " +
         "début. Pas de guillemets, pas de ponctuation finale, pas " +
-        "d'explication — uniquement le titre.",
+        "d'explication - uniquement le titre.",
       prompt,
       maxOutputTokens: 32,
     })
@@ -53,7 +53,7 @@ async function generateTitle(prompt: string) {
 
     if (!title) {
       // The call came back, so this is the model answering with nothing rather
-      // than the model being unreachable — a different failure from the catch
+      // than the model being unreachable - a different failure from the catch
       // below, and one only a log would ever show.
       Sentry.logger.warn("Title model returned nothing usable", {
         "gen_ai.operation.name": "generate_content",
@@ -64,7 +64,7 @@ async function generateTitle(prompt: string) {
 
     return title || truncateTitle(prompt)
   } catch (error) {
-    // Swallowed on purpose — an awkward title beats a failed create — but
+    // Swallowed on purpose - an awkward title beats a failed create - but
     // swallowed silently this is invisible, and a title model that is down
     // looks from the outside like a product that stopped naming games.
     Sentry.logger.warn("Title generation failed, falling back to the prompt", {
@@ -85,7 +85,7 @@ async function generateTitle(prompt: string) {
  * The prompt is stored as the thread's opening message so it survives the
  * navigation without riding along in the URL; `ChatThread` asks for the reply
  * once the game page mounts. The model picked alongside it does ride in the
- * URL — see the redirect below.
+ * URL - see the redirect below.
  *
  * Server Actions are reachable by direct POST, so the user is resolved from
  * the session here rather than trusted from the caller.
@@ -109,7 +109,7 @@ export async function createGame(prompt: string, modelId: GameModelId) {
   const userId = session.user.id
 
   // Tags, not scope attributes: attributes reach spans and events but not logs,
-  // and these are here for the *events* — so that a throw further down (the
+  // and these are here for the *events* - so that a throw further down (the
   // insert, the redirect) arrives in Sentry already saying whose create it was.
   // The logs below carry the same identity explicitly.
   //
@@ -146,7 +146,7 @@ export async function createGame(prompt: string, modelId: GameModelId) {
     .returning({ id: games.id })
 
   // The funnel's first step, and the one every other signal here hangs off. The
-  // prompt itself is not logged — only its length: prompts are kept out of
+  // prompt itself is not logged - only its length: prompts are kept out of
   // Sentry deliberately (see `httpBodies: []` in the SDK configs), and the
   // length is what answers the question a log can answer anyway, which is
   // whether people are typing a sentence or a design document.
@@ -155,7 +155,7 @@ export async function createGame(prompt: string, modelId: GameModelId) {
     "game.id": game.id,
     "user.id": userId,
     "prompt.length": trimmedPrompt.length,
-    // Which model the game is about to be built with — the one question about
+    // Which model the game is about to be built with - the one question about
     // a create that only a picker makes it possible to ask.
     "game.model": model,
     duration_ms: elapsed(startedAt),
@@ -163,14 +163,14 @@ export async function createGame(prompt: string, modelId: GameModelId) {
 
   // The redirect below stays inside `app/(app)/layout.tsx`, so invalidate the
   // router cache rather than let the sidebar render the games list it already
-  // has — the new game is missing from it.
+  // has - the new game is missing from it.
   refresh()
 
   // The model rides along in the query string, which is the whole of how the
   // home page's pick reaches the thread: it belongs to this navigation rather
   // than to the game, so there is nothing on the row to keep it in, and the
-  // thread is free to change it from there. The default is left off — the game
-  // page falls back to it — so the ordinary URL stays `/games/{id}`.
+  // thread is free to change it from there. The default is left off - the game
+  // page falls back to it - so the ordinary URL stays `/games/{id}`.
   //
   // `redirect` throws, so nothing may follow it here.
   redirect(
@@ -184,7 +184,7 @@ export async function createGame(prompt: string, modelId: GameModelId) {
  * Renames a game.
  *
  * The title is the game's only editable field, and the same length cap the
- * generated ones get applies here — the sidebar and the game header both render
+ * generated ones get applies here - the sidebar and the game header both render
  * it in one line, and neither is a place to discover that a title was pasted
  * from a document.
  *
@@ -206,7 +206,7 @@ export async function renameGame(gameId: string, title: string) {
   await db.update(games).set({ title: trimmed }).where(eq(games.id, gameId))
 
   // The title itself is not logged, for the same reason prompts are not:
-  // it is the player's words. The length is what a log would want anyway —
+  // it is the player's words. The length is what a log would want anyway -
   // whether people are naming games or writing sentences in the box.
   Sentry.logger.info(Sentry.logger.fmt`Renamed game ${gameId}`, {
     "app.action": "renameGame",
@@ -229,18 +229,18 @@ export async function renameGame(gameId: string, title: string) {
  *  1. End the chat session, so no turn is mid-flight when the row goes and
  *     none can start after it.
  *  2. Delete the sandboxes. This is the step allowed to fail the whole action:
- *     it throws, the row survives, and the player can try again — a game they
+ *     it throws, the row survives, and the player can try again - a game they
  *     can still see is the only handle a retry has.
  *  3. Delete the row. From here on nothing can make another sandbox for this
  *     game: `getGameSandbox` reads the row first and throws without one.
  *  4. Sweep once more. A tool that read the row just before step 3 could have
  *     created a sandbox after step 2 looked; the sweep is by label, so it finds
- *     that one too. Failing here is only logged — the game is already gone, so
+ *     that one too. Failing here is only logged - the game is already gone, so
  *     there is nothing left for the player to retry.
  *
  * `returnHome` is the caller saying whether the page it is on belongs to the
  * game it just deleted. The menu is in the sidebar as well as the game header,
- * so a delete is as likely to be aimed at a game nobody is looking at — and
+ * so a delete is as likely to be aimed at a game nobody is looking at - and
  * moving that person to the home page would be a navigation they did not ask
  * for. The destination is fixed here, so a caller only chooses between leaving
  * and staying.
@@ -275,7 +275,7 @@ export async function deleteGame(gameId: string, returnHome: boolean) {
   }
 
   // The end of the funnel that starts with the create log above, and the only
-  // record that this game existed once the row is gone — which is why it
+  // record that this game existed once the row is gone - which is why it
   // carries the sandbox count rather than leaving that to the Daytona log.
   Sentry.logger.info(Sentry.logger.fmt`Deleted game ${gameId}`, {
     "app.action": "deleteGame",
@@ -290,7 +290,7 @@ export async function deleteGame(gameId: string, returnHome: boolean) {
   refresh()
 
   // And when what is on screen is the deleted game's own page, the refresh
-  // above is what would turn it into a 404 — so leaving is not a courtesy here
+  // above is what would turn it into a 404 - so leaving is not a courtesy here
   // but the rest of the delete.
   //
   // `redirect` throws, so nothing may follow it here.

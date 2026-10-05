@@ -1,7 +1,7 @@
 /* The page the game is played in.
 
    Kept in its own file so a new sandbox is seeded with the layout the agent is
-   told to grow into — markup, styles and scripts side by side in the game
+   told to grow into - markup, styles and scripts side by side in the game
    directory. The rules here are the ones every 3D game in a browser needs: a
    canvas that fills the viewport exactly, nothing that scrolls, and a body that
    HUD overlays can position themselves against. */
@@ -44,7 +44,7 @@ body {
     Helvetica,
     Arial,
     sans-serif;
-  /* A game is dragged and tapped, not selected — without this every drag
+  /* A game is dragged and tapped, not selected - without this every drag
      highlights the HUD text and every double tap zooms the game away. */
   user-select: none;
   -webkit-user-select: none;

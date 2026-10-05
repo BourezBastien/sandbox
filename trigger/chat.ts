@@ -16,8 +16,8 @@ import { createGameTools } from "@/lib/games/tools"
 
 // Everything the browser gets to say about a turn, which is the model to run it
 // on and nothing else. The id is checked against the catalog rather than taken
-// as a string, so a tab naming a model this app doesn't offer — or one that
-// doesn't exist — is rejected here instead of at the provider.
+// as a string, so a tab naming a model this app doesn't offer - or one that
+// doesn't exist - is rejected here instead of at the provider.
 //
 // Optional at both levels because there is no picker yet: nothing sends client
 // data at all today, and a turn with none runs on `DEFAULT_GAME_MODEL_ID`.
@@ -40,7 +40,7 @@ const MAX_STEPS = 48
  * back at the top of every turn instead of trusting the copy the browser holds.
  *
  * Authorization happens before a session can exist, in the server actions in
- * `@/lib/games/chat-actions` — there is no user session in here to scope by.
+ * `@/lib/games/chat-actions` - there is no user session in here to scope by.
  */
 export const gameChat = chat.agent({
   id: "game-chat",
@@ -51,12 +51,12 @@ export const gameChat = chat.agent({
 
     // Appends a genuinely new user message and no-ops otherwise. A new game is
     // created with its opening prompt already stored, and the client replays
-    // that same message to ask for the first reply — this dedupes it by id.
+    // that same message to ask for the first reply - this dedupes it by id.
     //
     // Nothing is written here, deliberately. The turn that answers an
     // `ask_player` question arrives as a state advance on a message this row
     // already holds, which is exactly the case this no-ops on, and the runtime
-    // only overlays that advance onto the chain *after* this hook returns — so
+    // only overlays that advance onto the chain *after* this hook returns - so
     // a write from here could never carry the answer. `onTurnStart` persists
     // the merged chain instead, which covers both cases in one statement.
     const appended = upsertIncomingMessage(stored, {
@@ -81,15 +81,15 @@ export const gameChat = chat.agent({
 
     return stored
   },
-  // Fires once per game, on the first message of its thread — so the sandbox
+  // Fires once per game, on the first message of its thread - so the sandbox
   // is created exactly once and is already seeded before `run` streams a reply.
   onChatStart: async ({ chatId }) => {
     try {
       await createGameSandbox(chatId)
     } catch (error) {
       // Fires exactly once per game, and everything the agent does afterwards
-      // needs what it builds. Failing here doesn't stop the turn — the tools
-      // fall back to creating a sandbox themselves — but it does mean the first
+      // needs what it builds. Failing here doesn't stop the turn - the tools
+      // fall back to creating a sandbox themselves - but it does mean the first
       // turn pays that cost mid-stream, and it is the explanation for the
       // `getGameSandbox` warning that follows.
       logger.error(
@@ -109,7 +109,7 @@ export const gameChat = chat.agent({
     // holds, and the runtime overlays it between `hydrateMessages` and here.
     //
     // Written before the turn rather than after it, because the turn it opens
-    // is a build that runs for minutes — and until this lands, a reload reads
+    // is a build that runs for minutes - and until this lands, a reload reads
     // the row back and puts the same question to the player a second time. A
     // turn that dies part way never reaches `onTurnComplete` and would
     // otherwise leave the answer nowhere.
@@ -156,7 +156,7 @@ export const gameChat = chat.agent({
       "gen_ai.request.model": clientData?.modelId ?? DEFAULT_GAME_MODEL_ID,
       "chat.messages": uiMessages.length,
       // A turn that ends with no cursor cannot be resumed, so a reload
-      // replays it — worth being able to count.
+      // replays it - worth being able to count.
       "chat.has_cursor": lastEventId !== undefined,
       duration_ms: elapsed(startedAt),
     })
@@ -176,7 +176,7 @@ export const gameChat = chat.agent({
     const modelId = clientData?.modelId ?? DEFAULT_GAME_MODEL_ID
 
     // A turn with nothing to answer. The history ends on the agent's own reply,
-    // which means whatever opened this turn added no message to it — a thread
+    // which means whatever opened this turn added no message to it - a thread
     // submitted twice, or a tab asking for a reply it has already been given.
     // A trailing assistant message is read as a prefill for the model to carry
     // on from, and these models refuse one outright, so the turn would die at
@@ -197,14 +197,14 @@ export const gameChat = chat.agent({
 
     return streamText({
       // Spread first, so every option below still wins. Wires up the
-      // `prepareStep` behind compaction, steering and background injection —
+      // `prepareStep` behind compaction, steering and background injection -
       // all of which silently no-op without it.
       ...chat.toStreamTextOptions({ tools }),
       // Spread rather than assigned because what varies with the model is
       // `model` today and may not be only that later.
       ...gameModelSettings(modelId),
       // `instructions`, not the deprecated `system`. Passed here rather than
-      // through `chat.prompt.set()` because the prompt is static — there is no
+      // through `chat.prompt.set()` because the prompt is static - there is no
       // per-chat or dashboard-versioned part of it to resolve in a hook.
       instructions: gameInstructions,
       messages,

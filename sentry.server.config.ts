@@ -17,8 +17,8 @@ Sentry.init({
   enableLogs: true,
 
   integrations: [
-    // Nothing in this app logs through `console` directly — everything goes
-    // through `Sentry.logger` — but a stray `console.warn` from here or from a
+    // Nothing in this app logs through `console` directly - everything goes
+    // through `Sentry.logger` - but a stray `console.warn` from here or from a
     // dependency is still worth having next to the structured logs rather than
     // only in the platform's stdout. `log`/`info` are left out: they are where
     // build and framework noise lives.
@@ -36,8 +36,8 @@ Sentry.init({
   // hook is the one place that actually stamps every log.
   //
   // It earns its keep because all four runtimes report into one Sentry project,
-  // and two of the modules that log — `@/lib/daytona/utils` and
-  // `@/lib/games/tools` — run in more than one of them, emitting the same
+  // and two of the modules that log - `@/lib/daytona/utils` and
+  // `@/lib/games/tools` - run in more than one of them, emitting the same
   // messages from each.
   beforeSendLog: (log) => {
     // `trace` and `debug` are development aids. They stay out of production

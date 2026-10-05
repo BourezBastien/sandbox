@@ -7,7 +7,7 @@ import { db, games, user } from "@/lib/db"
 /**
  * Whether the /install bootstrap still has something to do.
  *
- * True once any user holds the admin role — the page locks for good after the
+ * True once any user holds the admin role - the page locks for good after the
  * first admin exists, so a returning visitor to /install is redirected rather
  * than offered a second shot at it.
  */

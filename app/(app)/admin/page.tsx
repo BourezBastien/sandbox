@@ -63,7 +63,7 @@ export default async function AdminPage() {
               Jeux
             </span>
             <span className="text-sm text-muted-foreground">
-              Tous les jeux de la classe avec leur propriétaire — ouvrez-en un
+              Tous les jeux de la classe avec leur propriétaire. Ouvrez-en un
               pour suivre sa construction en direct.
             </span>
           </Link>

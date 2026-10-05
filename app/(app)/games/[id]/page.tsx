@@ -17,7 +17,7 @@ export default async function GamePage({
   }
 
   // Where the home page's pick lands: `createGame` puts it here rather than on
-  // the row, because it is only the thread's starting point — the picker in the
+  // the row, because it is only the thread's starting point - the picker in the
   // thread takes over from it, and the URL is not rewritten when it does. It is
   // also just a query string, so it is checked rather than believed.
   const { model } = await searchParams
@@ -36,7 +36,7 @@ export default async function GamePage({
         initialModelId={isGameModelId(model) ? model : DEFAULT_GAME_MODEL_ID}
         sandboxId={game.sandboxId}
         // The chat session the last turn persisted. Absent until a game has had
-        // one, and the token may already have expired — the transport refreshes
+        // one, and the token may already have expired - the transport refreshes
         // it through the mint action on a 401.
         initialSession={
           game.chatAccessToken

@@ -9,15 +9,15 @@ import type { FileUpload } from "@daytona/sdk"
 // Resolved from the process' working directory rather than from this module's
 // url: this code is bundled into the Trigger.dev worker, so `import.meta.url`
 // points at a build artifact, while the working directory is the project root
-// in dev and the deployment root in production — both of which `runtime/*`
+// in dev and the deployment root in production - both of which `runtime/*`
 // keeps its path relative to (see `additionalFiles` in `@/trigger.config`).
 const RUNTIME_DIR = path.join(process.cwd(), "lib", "games", "runtime")
 
 /**
  * Every file under `./runtime`, addressed to where it belongs in a sandbox.
  *
- * The tree is walked rather than listed, so a file added to `runtime/` — at
- * any depth — is seeded without anything here having to learn its name.
+ * The tree is walked rather than listed, so a file added to `runtime/` - at
+ * any depth - is seeded without anything here having to learn its name.
  *
  * Folders come back separately, parents first, because an upload names a
  * destination path but doesn't create the directories leading to it.

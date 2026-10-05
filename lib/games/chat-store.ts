@@ -10,7 +10,7 @@ import { db, games } from "@/lib/db/client"
  * A game's stored chat thread.
  *
  * Lookups here are by id alone, with no user scoping, unlike `getGame`. The
- * caller is the chat agent, which has no user session to scope by — a game id
+ * caller is the chat agent, which has no user session to scope by - a game id
  * only ever reaches it through a session the server actions in
  * `@/lib/games/chat-actions` already authorized against the caller.
  */

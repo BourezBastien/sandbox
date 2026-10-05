@@ -42,7 +42,7 @@ import { TITLE_MAX_LENGTH } from "@/lib/games/title"
  *
  * Both go through a dialog rather than straight to the action. Renaming needs
  * one because it has something to collect; deleting needs one because it takes
- * the thread and the sandbox with it and there is no undo — hence an
+ * the thread and the sandbox with it and there is no undo - hence an
  * `AlertDialog` for that one and a plain `Dialog` for the other.
  *
  * The title is a prop rather than state: every caller renders it from the row
@@ -68,7 +68,7 @@ export function GameMenu({
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
-  // The box starts from what the game is called now, every time — a name
+  // The box starts from what the game is called now, every time - a name
   // abandoned in a previous open should not come back on the next one.
   function openDialog(next: "rename" | "delete") {
     setName(title)
@@ -95,7 +95,7 @@ export function GameMenu({
         setDialog(null)
       } catch {
         // Server Action errors reach the browser stripped of their message in
-        // production, so there is nothing here worth showing verbatim — only
+        // production, so there is nothing here worth showing verbatim - only
         // that the name was not saved, and that trying again is reasonable.
         setError("Ce nom n'a pas pu être enregistré. Réessaie.")
       }
@@ -135,7 +135,7 @@ export function GameMenu({
         >
           <EllipsisIcon />
         </DropdownMenuTrigger>
-        {/* Anchored to the trigger's right edge, which is the window's — a menu
+        {/* Anchored to the trigger's right edge, which is the window's - a menu
             aligned the other way would hang off the screen. */}
         <DropdownMenuContent align="end" className="w-40">
           <DropdownMenuItem onClick={() => openDialog("rename")}>

@@ -29,17 +29,17 @@ const LIST_DEPTH = 5
  *
  * Alone among the tools it has no `execute`. The call ends the turn with its
  * result still pending, the player answers it in the chat, and the next turn
- * resumes from their choice — the run suspends while it waits, so they can
+ * resumes from their choice - the run suspends while it waits, so they can
  * take as long as they like. That is also why it needs an `outputSchema`:
  * with no execute function to infer a result from, the schema is the only
  * statement of what an answer looks like.
  *
  * Static, so it is declared once here rather than built per game like the file
- * tools — nothing about it depends on which sandbox the answer lands in.
+ * tools - nothing about it depends on which sandbox the answer lands in.
  */
 const askPlayer = tool({
   description:
-    "Put one design question to the player and wait for their answer. Use it to settle a part of the game they haven't decided yet — on the opening turn, to work out what the game actually is before writing any of it. One question per call: the turn stops here until they pick, then carries on, so ask the next one after this answer rather than folding several into one.",
+    "Put one design question to the player and wait for their answer. Use it to settle a part of the game they haven't decided yet - on the opening turn, to work out what the game actually is before writing any of it. One question per call: the turn stops here until they pick, then carries on, so ask the next one after this answer rather than folding several into one.",
   inputSchema: z.object({
     // First in the schema so it is generated first: naming the part of the
     // game up front keeps the options on one axis, so the player picks
@@ -49,19 +49,19 @@ const askPlayer = tool({
       .describe(
         [
           "The part of the game the question is about. Choose it first, then write a question that stays inside it.",
-          "- loop: the action the player repeats — what they are doing second to second.",
-          "- goal: what they are playing towards — winning, losing, scoring, progressing.",
+          "- loop: the action the player repeats - what they are doing second to second.",
+          "- goal: what they are playing towards - winning, losing, scoring, progressing.",
           "- challenge: what stands in their way, and how hard it pushes.",
           "- controls: what they press, and how the game answers.",
           "- world: setting, theme, and how the space is laid out.",
-          "- look: art direction — style, palette, camera, scale.",
+          "- look: art direction - style, palette, camera, scale.",
           "- feel: pace, weight, juice and sound.",
         ].join("\n")
       ),
     question: z
       .string()
       .describe(
-        "The question, in one sentence and in the player's terms — what the game would be, not how it would be built."
+        "The question, in one sentence and in the player's terms - what the game would be, not how it would be built."
       ),
     options: z
       .array(
@@ -84,7 +84,7 @@ const askPlayer = tool({
       .min(2)
       .max(4)
       .describe(
-        "The answers to choose between. Each one a different game you would be happy to build — no filler option, and nothing that asks them to write the answer themselves."
+        "The answers to choose between. Each one a different game you would be happy to build - no filler option, and nothing that asks them to write the answer themselves."
       ),
   }),
   outputSchema: z.object({
@@ -98,18 +98,18 @@ const askPlayer = tool({
  * through, and `ask_player` for the questions it puts back to the player.
  *
  * Built per game rather than declared once, because every file call has to
- * land in *this* game's sandbox and the model never sees a game id — the id is
+ * land in *this* game's sandbox and the model never sees a game id - the id is
  * closed over here instead of being an argument the model could get wrong.
  *
- * Tools report expected failures — a missing file, a path outside the game
- * directory, an ambiguous edit — as ordinary results, so the model reads what
+ * Tools report expected failures - a missing file, a path outside the game
+ * directory, an ambiguous edit - as ordinary results, so the model reads what
  * went wrong and fixes it on the next step. Anything else (a sandbox that
  * won't start, a network error) throws and fails the turn.
  */
 export function createGameTools(gameId: string) {
   // One sandbox lookup per turn instead of one per call: `getGameSandbox`
   // costs a query and a Daytona round-trip, and a turn is many edits. Only a
-  // resolved handle is kept — a failed lookup clears the cache so the next
+  // resolved handle is kept - a failed lookup clears the cache so the next
   // tool call retries rather than replaying the same rejection.
   let pending: Promise<Sandbox> | undefined
 
@@ -137,7 +137,7 @@ export function createGameTools(gameId: string) {
   return {
     read_file: tool({
       description:
-        "Read a file from the game directory. Read a file before editing it — what is on disk is what the player is running, including everything written on earlier turns.",
+        "Read a file from the game directory. Read a file before editing it - what is on disk is what the player is running, including everything written on earlier turns.",
       inputSchema: z.object({
         path: z
           .string()
@@ -194,7 +194,7 @@ export function createGameTools(gameId: string) {
           const directory = path.posix.dirname(target)
 
           // `uploadFile` won't create the parent, and `createFolder` fails on
-          // one that already exists — `mkdir -p` covers both, and the path is
+          // one that already exists - `mkdir -p` covers both, and the path is
           // known safe to interpolate by `resolveGamePath`.
           if (directory !== GAME_DIR) {
             await box.process.executeCommand(`mkdir -p '${directory}'`)
@@ -216,7 +216,7 @@ export function createGameTools(gameId: string) {
         find: z
           .string()
           .describe(
-            "The exact text to replace, including its indentation and line breaks. Must appear exactly once in the file unless replace_all is true — include the surrounding lines to make a short snippet unique."
+            "The exact text to replace, including its indentation and line breaks. Must appear exactly once in the file unless replace_all is true - include the surrounding lines to make a short snippet unique."
           ),
         replace: z
           .string()
@@ -235,7 +235,7 @@ export function createGameTools(gameId: string) {
           const target = resolveGamePath(filePath)
 
           if (find === "") {
-            return "find cannot be empty — pass the exact text to replace."
+            return "find cannot be empty - pass the exact text to replace."
           }
 
           const box = await sandbox()
@@ -319,7 +319,7 @@ export function createGameTools(gameId: string) {
 
     delete_file: tool({
       description:
-        "Delete a file or directory from the game directory. Only for files the game no longer uses — deleting index.html leaves the preview with nothing to load.",
+        "Delete a file or directory from the game directory. Only for files the game no longer uses - deleting index.html leaves the preview with nothing to load.",
       inputSchema: z.object({
         path: z
           .string()
@@ -358,7 +358,7 @@ export type GameTools = ReturnType<typeof createGameTools>
  * A failure the model can fix by calling the tool differently.
  *
  * Thrown from the helpers so a check can bail from anywhere, and turned back
- * into a plain tool result by `expected` — the model reads it as an answer and
+ * into a plain tool result by `expected` - the model reads it as an answer and
  * corrects course, instead of the turn dying on a rejected tool call.
  */
 class ToolInputError extends Error {}
@@ -370,7 +370,7 @@ class ToolInputError extends Error {}
  * This is the only path every tool call passes through, which makes it the one
  * place worth logging them from: one wide event per call, carrying the tool,
  * the game, the path it was pointed at and what it cost. That record is the
- * agent's entire effect on a game — the chat thread shows what the model said
+ * agent's entire effect on a game - the chat thread shows what the model said
  * it did, and this shows what actually reached the sandbox.
  *
  * The three outcomes are deliberately three levels. A refused call is a `warn`:
@@ -395,7 +395,7 @@ async function expected(
     "game.id": gameId,
   }
 
-  // The path the model asked for, before it is resolved — an argument the
+  // The path the model asked for, before it is resolved - an argument the
   // model chose, and the thing most worth having when a call went wrong.
   // Contents are never logged: game source stays out of Sentry, in line with
   // the `httpBodies: []` stance in the SDK configs.
@@ -474,7 +474,7 @@ function resolveGamePath(
   return resolved
 }
 
-/** A path as the agent wrote it — relative to the game directory. */
+/** A path as the agent wrote it - relative to the game directory. */
 function relative(fullPath: string): string {
   return path.posix.relative(GAME_DIR, fullPath) || "."
 }

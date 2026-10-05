@@ -20,7 +20,7 @@ import { elapsed } from "@/lib/observability"
  * `x-daytona-preview-token` header the standard link requires.
  *
  * `getGame` resolves the caller from the session and scopes the lookup to it,
- * so a game belonging to someone else — or a caller with no session at all —
+ * so a game belonging to someone else - or a caller with no session at all -
  * is indistinguishable from a game that doesn't exist.
  */
 export async function GET(
@@ -30,7 +30,7 @@ export async function GET(
   const startedAt = performance.now()
   const { id } = await ctx.params
 
-  // Tags, for the events rather than the logs — a 500 out of `startGameServer`
+  // Tags, for the events rather than the logs - a 500 out of `startGameServer`
   // arrives naming the game. Scope attributes would not reach the logs below,
   // which carry the game id themselves.
   Sentry.getIsolationScope().setTags({
@@ -41,7 +41,7 @@ export async function GET(
   const game = await getGame(id)
 
   // Deliberately indistinguishable from another org's game, so the log is the
-  // only place the difference is recorded — and the one place a player stuck on
+  // only place the difference is recorded - and the one place a player stuck on
   // "Preview is unavailable" can be told apart from someone walking game ids.
   if (!game) {
     Sentry.logger.warn(
@@ -56,7 +56,7 @@ export async function GET(
   // Null until the thread's first turn creates the sandbox, and for games made
   // before sandboxes existed. Neither has anything to preview yet.
   if (!game.sandboxId) {
-    // Expected on a brand-new game, so not a warning — but a game still
+    // Expected on a brand-new game, so not a warning - but a game still
     // answering 409 well after its first turn finished means `onChatStart`
     // never ran, and this is what shows that.
     Sentry.logger.info(
@@ -72,7 +72,7 @@ export async function GET(
   }
 
   // A throw from here is a 500, which `onRequestError` in `@/instrumentation`
-  // already captures with a stack trace — and `startGameServer` logs the reason
+  // already captures with a stack trace - and `startGameServer` logs the reason
   // the start failed on its way past. Nothing to add around it here.
   const { sandbox } = await startGameServer(game.sandboxId)
   const { url } = await sandbox.getSignedPreviewUrl(
@@ -81,7 +81,7 @@ export async function GET(
   )
 
   // The url is signed and the signature rides in the query, so it is a
-  // credential — the sandbox id identifies the same thing without being one.
+  // credential - the sandbox id identifies the same thing without being one.
   Sentry.logger.info(Sentry.logger.fmt`Served preview url for game ${id}`, {
     "game.id": id,
     "sandbox.id": game.sandboxId,

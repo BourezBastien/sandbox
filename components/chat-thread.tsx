@@ -77,7 +77,7 @@ export function ChatThread({
   const [prompt, setPrompt] = useState("")
   // The thread owns the choice from here on, because the thread is what sends
   // the turns. It starts on whatever the home page picked, and a switch made
-  // here lives as long as the tab — nothing on the game records what it was
+  // here lives as long as the tab - nothing on the game records what it was
   // built with, so a reload starts over from the URL.
   const [modelId, setModelId] = useState<GameModelId>(initialModelId)
 
@@ -85,7 +85,7 @@ export function ChatThread({
   // and a fresh object literal every render would be a change every render.
   const clientData = useMemo(() => ({ modelId }), [modelId])
 
-  // There is no endpoint to point at — the transport talks to the chat agent
+  // There is no endpoint to point at - the transport talks to the chat agent
   // directly, and both callbacks are server actions so the browser never holds
   // an environment secret key. The chat id doubles as the game id the thread is
   // persisted under.
@@ -135,7 +135,7 @@ export function ChatThread({
   )
 
   // Read inside `onError`, which `useChat` holds from the render it was created
-  // in — reading `messages` there directly would report the thread as it was
+  // in - reading `messages` there directly would report the thread as it was
   // when the callback was made rather than when the turn failed.
   const messageCount = useRef(0)
 
@@ -151,7 +151,7 @@ export function ChatThread({
     messages: initialMessages,
     transport: chatTransport,
     // Answering `ask_player` resolves the tool call the paused turn is sitting
-    // on, and that answer is only useful to the agent if it goes back — this
+    // on, and that answer is only useful to the agent if it goes back - this
     // submits the thread again the moment the last message has no tool call
     // left waiting, so the player never has to press send to be understood.
     //
@@ -166,16 +166,19 @@ export function ChatThread({
     // the sandbox now holds the build the turn produced.
     //
     // Called however the turn ended. A turn stopped halfway, or one that died
-    // on an error, still leaves every file it wrote on disk — that is what the
+    // on an error, still leaves every file it wrote on disk - that is what the
     // player is running now, so it is what the preview should show.
     onFinish: onTurnComplete,
-    // A turn that dies — the run failing, the transport losing the stream,
-    // a token that could not be refreshed — settles the status back to ready
+    // A turn that dies - the run failing, the transport losing the stream,
+    // a token that could not be refreshed - settles the status back to ready
     // and leaves the thread looking like the agent simply had nothing to say.
     // Nothing else in the app sees this: the worker's own failure is logged on
     // its side only when the run itself failed, and a transport error never
     // gets that far.
     onError: (error) => {
+      // Console in addition to Sentry: with no Sentry configured, this is the
+      // only place a failed turn leaves a trace. F12 in the browser.
+      console.error("[chat] Tour échoué :", error)
       Sentry.logger.error(
         Sentry.logger.fmt`Chat turn failed for game ${gameId}`,
         {
@@ -195,7 +198,7 @@ export function ChatThread({
   })
 
   // Synced in an effect rather than assigned during render, which is a ref
-  // write React's rules — rightly — refuse.
+  // write React's rules - rightly - refuse.
   useEffect(() => {
     messageCount.current = messages.length
   }, [messages])
@@ -239,7 +242,7 @@ export function ChatThread({
   // never heard back about. The composer closes until they pick.
   //
   // Only the last message is ever in this state, which is also the only
-  // message `addToolOutput` can patch — so it doubles as which card is live.
+  // message `addToolOutput` can patch - so it doubles as which card is live.
   const lastMessage = messages.at(-1)
   const pendingQuestion = Boolean(
     lastMessage?.parts.some(
@@ -377,8 +380,8 @@ export function ChatThread({
  * Answering an `ask_player` question doesn't open a new agent message: the
  * agent carries on writing into the one that asked, so the turn it wakes
  * opens by naming that message's id. A tab that reloads while that turn is
- * running rejoins the stream part way through — from the cursor the *question*
- * was saved at — and the AI SDK reads the id as "this is that message", then
+ * running rejoins the stream part way through - from the cursor the *question*
+ * was saved at - and the AI SDK reads the id as "this is that message", then
  * swaps the thread's copy for the one it has built out of the stream. That
  * copy starts empty and only ever holds what arrived after the cursor, so the
  * question, and the answer under it, are what the swap drops.
@@ -409,7 +412,7 @@ function ToolCallMarker({ part }: { part: ToolUIPart | DynamicToolUIPart }) {
   return (
     <Marker
       className={cn("w-fit", status === "failed" && "text-destructive")}
-      // The error text can be a paragraph — the line stays one line, and the
+      // The error text can be a paragraph - the line stays one line, and the
       // detail is a hover away.
       title={part.state === "output-error" ? part.errorText : undefined}
     >
@@ -425,7 +428,7 @@ function ToolCallMarker({ part }: { part: ToolUIPart | DynamicToolUIPart }) {
       <MarkerContent>
         {status === "active" ? verbs.active : verbs.done}
         {target && <span className="ml-1 text-foreground">{target}</span>}
-        {status === "failed" && " — échec"}
+        {status === "failed" && " - échec"}
       </MarkerContent>
     </Marker>
   )
@@ -434,8 +437,8 @@ function ToolCallMarker({ part }: { part: ToolUIPart | DynamicToolUIPart }) {
 /**
  * The three states worth showing, out of the seven a tool part moves through.
  *
- * Everything before an output exists — streaming input, a complete call still
- * waiting, an approval round-trip — reads the same way to someone watching:
+ * Everything before an output exists - streaming input, a complete call still
+ * waiting, an approval round-trip - reads the same way to someone watching:
  * the agent is working on it. A denied call is a call that produced nothing,
  * so it lands with the errors.
  */
@@ -453,7 +456,7 @@ function toolCallStatus(
   }
 }
 
-// Present tense while the call is in flight, past tense once it has landed —
+// Present tense while the call is in flight, past tense once it has landed -
 // a finished call reads wrong as a frozen "Lecture".
 const TOOL_VERBS: Record<string, { active: string; done: string }> = {
   read_file: { active: "Lecture de", done: "Lu" },
@@ -470,7 +473,7 @@ const FALLBACK_VERBS = { active: "En cours", done: "Outil exécuté" }
  * The file a call is about, when it names one.
  *
  * The thread is rendered from untyped `UIMessage`s, so the input arrives as
- * `unknown` — and mid-stream it is a partial object that may not have reached
+ * `unknown` - and mid-stream it is a partial object that may not have reached
  * `path` yet, which is the same "no target to show" case as a tool that takes
  * none.
  */
@@ -515,8 +518,8 @@ type AskPlayerOption = { id: string; label: string; description?: string }
  * The agent's question, waiting on an answer from the player.
  *
  * The tool has no `execute`, so the turn ends here with the call unresolved
- * and the run suspended. Answering resolves it locally and — through
- * `sendAutomaticallyWhen` — sends the thread straight back, which wakes the
+ * and the run suspended. Answering resolves it locally and - through
+ * `sendAutomaticallyWhen` - sends the thread straight back, which wakes the
  * run and lets it carry on building from the choice.
  *
  * `onAnswer` is what makes the card live. Without it the question is history:
@@ -531,7 +534,7 @@ function AskPlayerCard({
 }) {
   const asked = askPlayerInput(part.input)
 
-  // Nothing to put to anyone until the whole question has arrived — the input
+  // Nothing to put to anyone until the whole question has arrived - the input
   // streams in a token at a time, and a call that failed outright never asked
   // anything. Both read as an ordinary call in the log.
   if (!asked || part.state === "input-streaming") {

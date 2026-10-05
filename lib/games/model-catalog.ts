@@ -3,7 +3,7 @@
  *
  * Client-safe on purpose: ids and copy, and nothing that talks to z.ai. The
  * provider instances live in `./models`, which pulls in the provider SDK and
- * reads the API key — so a component that only needs to *name* a model never
+ * reads the API key - so a component that only needs to *name* a model never
  * drags either of those into the browser bundle.
  *
  * The ids are z.ai's own model ids rather than slugs of our own. There is one
@@ -14,17 +14,17 @@ export const GAME_MODELS = [
   {
     id: "glm-4.7",
     name: "GLM 4.7",
-    tagline: "The most capable builder — best for a game from scratch.",
+    tagline: "Le plus doué. Parfait pour construire un jeu de zéro.",
   },
   {
     id: "glm-4.5-air",
     name: "GLM 4.5 Air",
-    tagline: "Faster and lighter. Good for iterating on a working game.",
+    tagline: "Rapide et léger. Parfait pour améliorer un jeu qui tourne.",
   },
   {
     id: "glm-4.7-flash",
     name: "GLM 4.7 Flash",
-    tagline: "The quickest and free — best for small, specific tweaks.",
+    tagline: "Le plus rapide, et gratuit. Parfait pour des petits réglages.",
   },
 ] as const
 
@@ -46,8 +46,8 @@ export const DEFAULT_GAME_MODEL_ID: GameModelId = "glm-4.7"
  * Whether a value names a model this app offers.
  *
  * A guard rather than a bare comparison, because the places that need it take
- * the id from somewhere the app doesn't control — a URL, a server action's
- * arguments — and want the narrowed type on the other side of the check.
+ * the id from somewhere the app doesn't control - a URL, a server action's
+ * arguments - and want the narrowed type on the other side of the check.
  */
 export function isGameModelId(value: unknown): value is GameModelId {
   return GAME_MODELS.some((model) => model.id === value)

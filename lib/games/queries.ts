@@ -8,7 +8,7 @@ import { getSession } from "@/lib/auth"
 /**
  * The caller off the current request, with just what scoping needs.
  *
- * Null for a signed-out caller — the same "nothing is visible" state the org
+ * Null for a signed-out caller - the same "nothing is visible" state the org
  * version of these queries had.
  */
 async function currentUser() {
@@ -20,7 +20,7 @@ async function currentUser() {
 /**
  * Games belonging to the caller, newest first.
  *
- * An admin sees their own games here, same as a student — the sidebar is a
+ * An admin sees their own games here, same as a student - the sidebar is a
  * personal recents list. Everything a game belongs to is on `/admin/games`.
  */
 export async function listGames(): Promise<Game[]> {
@@ -48,7 +48,7 @@ const UUID_RE =
  * A single game, or `undefined` when it doesn't exist or belongs to someone
  * else.
  *
- * The one exception is the admin: every game is theirs to open — watching a
+ * The one exception is the admin: every game is theirs to open - watching a
  * student's build in progress is the point of the admin pages, and the preview
  * route and chat tokens authorize through this same lookup.
  */

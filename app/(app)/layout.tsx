@@ -6,7 +6,7 @@ import { listGames } from "@/lib/games/queries"
 export default async function AppLayout({ children }: LayoutProps<"/">) {
   // The one guard for every page in this group: the sidebar below needs the
   // signed-in user anyway, and a caller without a session has nothing to see
-  // here. Banned callers never get this far — banning revokes every session.
+  // here. Banned callers never get this far - banning revokes every session.
   const { user } = await requireSession()
   const games = await listGames()
 

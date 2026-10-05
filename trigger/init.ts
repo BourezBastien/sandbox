@@ -7,7 +7,7 @@ import { tasks } from "@trigger.dev/sdk"
  *
  * Default integrations are off on purpose: nearly all of them are OpenTelemetry
  * auto-instrumentations, and Trigger.dev already owns the OTel setup inside a
- * run — letting Sentry patch the same libraries fights it for the trace. What
+ * run - letting Sentry patch the same libraries fights it for the trace. What
  * stays is the plain error transport and structured logging, which is all this
  * is here for.
  */
@@ -25,7 +25,7 @@ Sentry.init({
   // log into Sentry alongside the structured logs rather than adding anything.
   //
   // The counterpart to `service.name: "sandbox-web"` in
-  // sentry.server.config.ts — see the note there for why this is a
+  // sentry.server.config.ts - see the note there for why this is a
   // `beforeSendLog` and not a scope attribute. It is what tells a sandbox
   // failure inside a chat turn apart from one behind a preview request, since
   // both run the same module.
@@ -48,7 +48,7 @@ Sentry.init({
 })
 
 /**
- * Fires once per run, after every retry is exhausted — so a task that fails and
+ * Fires once per run, after every retry is exhausted - so a task that fails and
  * then succeeds on attempt 2 never reaches Sentry.
  *
  * Note this doesn't cover crashed, system-failure or canceled runs; those never
@@ -56,8 +56,8 @@ Sentry.init({
  */
 tasks.onFailure(async ({ payload, error, ctx }) => {
   Sentry.captureException(error, (scope) => {
-    // The Trigger.dev environment is only knowable per run — the same deployed
-    // bundle serves preview branches — so it's stamped here rather than at init.
+    // The Trigger.dev environment is only knowable per run - the same deployed
+    // bundle serves preview branches - so it's stamped here rather than at init.
     scope.addEventProcessor((event) => {
       event.environment = ctx.environment.slug
       return event
@@ -82,11 +82,11 @@ tasks.onFailure(async ({ payload, error, ctx }) => {
 })
 
 /**
- * One wide event per attempt, whichever way it ended — and, just as importantly,
+ * One wide event per attempt, whichever way it ended - and, just as importantly,
  * the flush that gets this run's logs out.
  *
  * Logs are batched client-side and sent on a timer, so without this the tail of
- * every run — which is where the interesting part of a failed turn is — would be
+ * every run - which is where the interesting part of a failed turn is - would be
  * dropped when the worker exits. `onFailure` only covers a run that ran out of
  * retries; this fires on every attempt, successful ones included.
  */
@@ -102,7 +102,7 @@ tasks.onComplete(async ({ task, result, ctx }) => {
   if (result.ok) {
     Sentry.logger.info(Sentry.logger.fmt`Run of ${task} succeeded`, attributes)
   } else {
-    // Not a `captureException` — `onFailure` already owns that, and only once
+    // Not a `captureException` - `onFailure` already owns that, and only once
     // the retries are spent. This is the per-attempt record, so a run that
     // recovers on attempt 2 still leaves a trace of the attempt that didn't.
     Sentry.logger.error(Sentry.logger.fmt`Run of ${task} failed`, {

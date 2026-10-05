@@ -25,7 +25,7 @@ Sentry.init({
   integrations: [
     Sentry.replayIntegration(),
     // The game runs in a cross-origin iframe, so none of its console output
-    // reaches this window — this only picks up the app shell's own, and a
+    // reaches this window - this only picks up the app shell's own, and a
     // dependency's. `runtime/report.js` is what carries the game's failures
     // across, and `ChatPreview` turns those into logs.
     Sentry.consoleLoggingIntegration({ levels: ["warn", "error"] }),
@@ -40,8 +40,8 @@ Sentry.init({
   // hook is the one place that actually stamps every log.
   //
   // It earns its keep because all four runtimes report into one Sentry project,
-  // and two of the modules that log — `@/lib/daytona/utils` and
-  // `@/lib/games/tools` — run in more than one of them, emitting the same
+  // and two of the modules that log - `@/lib/daytona/utils` and
+  // `@/lib/games/tools` - run in more than one of them, emitting the same
   // messages from each.
   beforeSendLog: (log) => {
     // `trace` and `debug` are development aids. They stay out of production

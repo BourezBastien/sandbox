@@ -61,7 +61,7 @@ export default async function AdminUsersPage() {
                 <TableRow key={user.id}>
                   <TableCell className="font-medium">{user.name}</TableCell>
                   <TableCell className="text-muted-foreground">
-                    {user.username ?? "—"}
+                    {user.username ?? "-"}
                   </TableCell>
                   <TableCell>
                     {user.role === "admin" ? (

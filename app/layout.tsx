@@ -19,7 +19,7 @@ const fontLogo = Fraunces({
 
 export const metadata: Metadata = {
   title: {
-    default: "Sandbox — Crée des jeux 3D avec l'IA",
+    default: "Sandbox : crée des jeux 3D avec l'IA",
     template: "%s · Sandbox",
   },
   description:

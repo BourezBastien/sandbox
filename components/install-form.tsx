@@ -14,7 +14,7 @@ import { installAdmin } from "@/lib/admin/actions"
 /**
  * The one-time creation of the admin account, on /install.
  *
- * The server re-checks that no admin exists before creating one — this form is
+ * The server re-checks that no admin exists before creating one - this form is
  * only the first door, not the lock. On success it goes to sign-in rather
  * than signing the new admin in directly, so the credential it just created
  * is the one that gets used from the very first click.
@@ -90,7 +90,7 @@ export function InstallForm() {
             value={name}
             onChange={(event) => setName(event.target.value)}
             disabled={isPending}
-            placeholder="Facultatif — par défaut, l'identifiant"
+            placeholder="Facultatif. Par défaut : l'identifiant"
           />
         </Field>
         <Field>

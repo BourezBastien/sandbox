@@ -26,7 +26,7 @@ const TIME_FORMAT = new Intl.DateTimeFormat("fr-FR", {
 /**
  * Every game in the class, sorted by latest activity.
  *
- * A row's link opens the game's own page as the admin — the live preview and
+ * A row's link opens the game's own page as the admin - the live preview and
  * the chat thread play there exactly as the student sees them, including a
  * turn in progress. `updated_at` moves on every turn, so the top of this
  * table is what is being worked on right now.
@@ -46,7 +46,7 @@ export default async function AdminGamesPage() {
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Triés par activité récente. Ouvrez un jeu pour suivre son aperçu et sa
-          discussion — même pendant une construction.
+          discussion, même pendant une construction.
         </p>
 
         {games.length === 0 ? (

@@ -20,7 +20,7 @@ import { GAME_MODELS, type GameModelId } from "@/lib/games/model-catalog"
  * only renders the catalog and reports a pick.
  *
  * A radio group rather than plain items, so the menu says which model is
- * running as well as which are available — the check is the answer to "what am
+ * running as well as which are available - the check is the answer to "what am
  * I on?", which the trigger can only give in the abbreviated form of a name.
  */
 export function ModelPicker({
@@ -30,7 +30,7 @@ export function ModelPicker({
   modelId: GameModelId
   onModelChange: (modelId: GameModelId) => void
 }) {
-  // Total in practice — `GameModelId` is derived from this same list — but not
+  // Total in practice - `GameModelId` is derived from this same list - but not
   // provably so to the type checker, and the trigger has to render something.
   const selected = GAME_MODELS.find((model) => model.id === modelId)
 
@@ -50,8 +50,8 @@ export function ModelPicker({
       <DropdownMenuContent className="w-72">
         <DropdownMenuRadioGroup
           value={modelId}
-          // The group's value is one of these ids by construction — the items
-          // below are the only things that can set it — but `RadioGroup` is
+          // The group's value is one of these ids by construction - the items
+          // below are the only things that can set it - but `RadioGroup` is
           // typed for arbitrary values and can't know that.
           onValueChange={(value) => onModelChange(value as GameModelId)}
         >

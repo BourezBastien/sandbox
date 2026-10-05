@@ -14,7 +14,7 @@ import { authClient } from "@/lib/auth-client"
 /**
  * Username + password, against Better Auth's username plugin.
  *
- * Accounts are created by the admin — there is no sign-up link to offer, which
+ * Accounts are created by the admin - there is no sign-up link to offer, which
  * is why the failure copy says to check with whoever runs the class rather
  * than pointing at a reset flow that does not exist.
  */

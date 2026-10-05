@@ -30,12 +30,13 @@ WORKDIR /app
 
 # `npm start` a besoin de la sortie du build et des fichiers que Next lit au
 # démarrage ; l'entrypoint a besoin de drizzle.config.ts + lib/db pour le push
-# du schéma, et de trigger/ + lib/ + tsconfig.json pour déployer le worker
-# Trigger.dev depuis le conteneur.
+# du schéma, et de trigger/ + lib/ + tsconfig.json + package-lock.json pour
+# déployer le worker Trigger.dev depuis le conteneur (le CLI exige le lockfile).
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/.next ./.next
 COPY --from=build /app/public ./public
 COPY --from=build /app/package.json ./package.json
+COPY --from=build /app/package-lock.json ./package-lock.json
 COPY --from=build /app/next.config.ts ./next.config.ts
 COPY --from=build /app/instrumentation.ts ./instrumentation.ts
 COPY --from=build /app/instrumentation-client.ts ./instrumentation-client.ts

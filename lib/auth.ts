@@ -17,19 +17,19 @@ import { account, session, user, verification } from "@/lib/db"
  *
  * Key choices, and why:
  *
- * - `disableSignUp` — the public sign-up endpoint is closed. The only accounts
+ * - `disableSignUp` - the public sign-up endpoint is closed. The only accounts
  *   are the ones the admin creates, which is the whole point of the admin
  *   panel for a class of students.
- * - no `cookieCache` — a cached session would keep working for its `maxAge`
+ * - no `cookieCache` - a cached session would keep working for its `maxAge`
  *   after a ban revoked it, and "blocked" must mean blocked now. Every request
  *   re-reads the session row instead; at thirty students that is nothing.
- * - `admin` plugin — gives `createUser`, `banUser` (which revokes every
+ * - `admin` plugin - gives `createUser`, `banUser` (which revokes every
  *   session), `setUserPassword`, `revokeUserSessions` and `removeUser`, all
  *   callable server-side with the caller's headers so the plugin's own
  *   admin-only check still applies.
- * - `username` plugin — sign-in is by username, the email column is a
+ * - `username` plugin - sign-in is by username, the email column is a
  *   placeholder derived from it.
- * - `x-forwarded-for` — the app sits behind Dokploy's reverse proxy, and the
+ * - `x-forwarded-for` - the app sits behind Dokploy's reverse proxy, and the
  *   header is what rate limiting counts clients by.
  */
 export const auth = betterAuth({
@@ -70,7 +70,7 @@ export async function getSession() {
  * The guard a protected page renders behind: redirects to sign-in rather than
  * rendering anything for a signed-out caller.
  *
- * A banned user never reaches the redirect-to-content branch — banning revokes
+ * A banned user never reaches the redirect-to-content branch - banning revokes
  * every session, so `getSession` reads no row and returns null for them.
  */
 export async function requireSession() {

@@ -22,14 +22,14 @@ type GameError = {
 // How often the panel asks the frame how it is doing. The exchange is a
 // postMessage round trip inside the browser, so the cost of asking is close to
 // nothing, and a game can throw at any point in its loop rather than only on
-// load — which is why this keeps asking for as long as the frame is mounted.
+// load - which is why this keeps asking for as long as the frame is mounted.
 const HEALTH_POLL_MS = 1000
 
 const text = (value: unknown) => (typeof value === "string" ? value : "")
 const count = (value: unknown) => (typeof value === "number" ? value : null)
 
 /**
- * A `game-status` reply, or null for anything else — including a healthy one.
+ * A `game-status` reply, or null for anything else - including a healthy one.
  *
  * Everything here crossed an origin boundary from code the agent wrote and the
  * player's extensions can also post into this window, so the shape is checked
@@ -73,7 +73,7 @@ function withoutQuery(value: string) {
  * the url itself.
  *
  * `revision` is bumped by whoever owns the thread every time a turn finishes,
- * and every value of it — including the first — is one load of the game. That
+ * and every value of it - including the first - is one load of the game. That
  * is the whole reload: the agent's edits land in the sandbox during the turn,
  * so the build to show is whatever is on disk when the turn ends.
  *
@@ -115,7 +115,7 @@ export function ChatPreview({
           error instanceof Error ? error.message : "L'aperçu est indisponible"
 
         // The player is about to see "Preview is unavailable" and nothing else
-        // — this is the only record of which of the several reasons it was.
+        // - this is the only record of which of the several reasons it was.
         // The route logs the two it answers deliberately (404, 409); what
         // reaches here on top of those is a 500 or the fetch itself failing.
         Sentry.logger.error(
@@ -133,7 +133,7 @@ export function ChatPreview({
 
         // A reload that fails leaves the game already on screen where it is.
         // It is the previous turn's build rather than the latest one, but the
-        // panel has no retry of its own — trading a working preview for an
+        // panel has no retry of its own - trading a working preview for an
         // error message would strand the player there until the next turn.
         setPreview((current) =>
           current.status === "ready" ? current : { status: "error", message }
@@ -149,7 +149,7 @@ export function ChatPreview({
   const ready = preview.status === "ready" ? preview : null
 
   // The game runs cross-origin, so an exception it throws lands in the frame's
-  // console and nowhere this app can reach — which is how a broken build turns
+  // console and nowhere this app can reach - which is how a broken build turns
   // into a black rectangle with no explanation. `runtime/report.js` catches the
   // first one on the other side and holds it; this asks for it and logs it.
   //
@@ -170,7 +170,7 @@ export function ChatPreview({
 
     const onMessage = (event: MessageEvent) => {
       // The frame is the only window this panel has anything to hear from, and
-      // its origin is a signed url that isn't known until it loads — so the
+      // its origin is a signed url that isn't known until it loads - so the
       // check is identity, which is the stronger of the two anyway.
       if (reported || !ready || event.source !== frame.contentWindow) return
 
@@ -236,7 +236,7 @@ export function ChatPreview({
     <iframe
       ref={frameRef}
       // Daytona signs a preview url per sandbox, not per build, so a reload
-      // normally hands the iframe the src it is already showing — and setting
+      // normally hands the iframe the src it is already showing - and setting
       // `src` to its current value is not a navigation. The revision keys the
       // element instead, so React tears the old frame down and mounts a new
       // one, which loads whatever the sandbox now serves.

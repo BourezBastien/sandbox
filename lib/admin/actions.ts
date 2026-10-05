@@ -16,14 +16,14 @@ import { describeError, elapsed } from "@/lib/observability"
 const MIN_USERNAME_LENGTH = 3
 const MIN_PASSWORD_LENGTH = 8
 
-/** The placeholder domain for emails — no student has a real one to give. */
+/** The placeholder domain for emails - no student has a real one to give. */
 const PLACEHOLDER_EMAIL_DOMAIN = "college.local"
 
 /**
  * The guard every admin action runs first: signed in, and the admin role.
  *
  * Server Actions are reachable by direct POST, so this is checked here rather
- * than trusted from the page that rendered the button — the page hiding the
+ * than trusted from the page that rendered the button - the page hiding the
  * button is UX, not security.
  */
 async function requireAdmin() {
@@ -41,7 +41,7 @@ async function requireAdmin() {
  *
  * Usernames are lowercased on purpose: they are typed by students, on school
  * keyboards, and `Martin` and `martin` being two different accounts helps
- * nobody. The email is a placeholder derived from the username — the email
+ * nobody. The email is a placeholder derived from the username - the email
  * column is required by Better Auth but means nothing here, and deriving it
  * keeps it unique for free.
  */
@@ -79,7 +79,7 @@ function prepareAccountInput(username: string, password: string, name: string) {
  * sign-up would.
  *
  * Used by both the /install bootstrap (where no admin exists yet to call the
- * admin endpoints) and the admin panel — the panel's actions add `role` and
+ * admin endpoints) and the admin panel - the panel's actions add `role` and
  * their own guard on top. The password is hashed by the same scrypt
  * configuration sign-in verifies against, so nothing here is a backdoor.
  */
@@ -106,7 +106,7 @@ async function insertAccount({
       emailVerified: true,
       role,
     },
-    // The method Better Auth's own sign-up passes — it is how plugins tell
+    // The method Better Auth's own sign-up passes - it is how plugins tell
     // which rules apply to the user being made.
     { method: "email-password" }
   )
@@ -130,7 +130,7 @@ async function insertAccount({
 /**
  * The /install bootstrap: creates the first admin account, exactly once.
  *
- * Reachable without a session by design — there is nothing to sign in to yet.
+ * Reachable without a session by design - there is nothing to sign in to yet.
  * The gate is that no admin exists: once one does, this throws and /install
  * redirects away from its form. Two installs racing each other are settled by
  * the unique constraints on username and email, so the worst case is one
@@ -188,7 +188,7 @@ export async function createStudentAccount(input: {
     await insertAccount({ ...prepared, role: "user" })
   } catch (error) {
     // The only input the constraints can reject is a username that already
-    // exists — everything else about the shape was validated above.
+    // exists - everything else about the shape was validated above.
     Sentry.logger.warn(
       Sentry.logger
         .fmt`Rejected an account for existing username ${prepared.username}`,
@@ -236,7 +236,7 @@ export async function resetUserPassword(input: {
  * stopped, and the next request from them is refused.
  *
  * The three steps in order:
- *  1. `banUser` marks the row — the admin plugin's session read rejects a
+ *  1. `banUser` marks the row - the admin plugin's session read rejects a
  *     banned user even before their session rows are gone, so there is no
  *     gap between the two.
  *  2. `revokeUserSessions` deletes the session rows, which is what keeps them
@@ -280,7 +280,7 @@ export async function banUserAccount(input: {
 
 /**
  * Unblocks an account. Sessions were revoked at ban time, so the student
- * signs back in — nothing to restore beyond the flag itself.
+ * signs back in - nothing to restore beyond the flag itself.
  */
 export async function unbanUserAccount(input: { userId: string }) {
   await requireAdmin()
@@ -320,7 +320,7 @@ export async function forceSignOut(input: { userId: string }) {
 /**
  * Deletes an account, its games, and everything Daytona is holding for them.
  *
- * The per-game cleanup is the delete-game path in miniature — end the chat
+ * The per-game cleanup is the delete-game path in miniature - end the chat
  * session (a turn left streaming would keep calling tools against a game that
  * no longer exists), then the sandboxes, then the row. Failures on individual
  * games are logged and swallowed: the account is going either way, and an

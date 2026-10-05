@@ -11,7 +11,7 @@ import { describeError, elapsed, logger } from "@/lib/observability"
 
 // Where the game's source lives inside the sandbox. `/home/daytona` is the
 // sandbox user's home, so this is the path a dev server would be pointed at.
-// Exported because the agent is told this path in `@/lib/games/instructions` —
+// Exported because the agent is told this path in `@/lib/games/instructions` -
 // the prompt and the server have to be pointed at the same directory.
 export const GAME_DIR = "/home/daytona/game"
 
@@ -50,7 +50,7 @@ export async function createGameSandbox(
     .where(eq(games.id, gameId))
 
   // The one place a sandbox comes into existence, and the slowest step in a
-  // game's first turn — a create that has crept from seconds to a minute is
+  // game's first turn - a create that has crept from seconds to a minute is
   // visible here and nowhere else, which is why the duration is on it.
   logger.info(logger.fmt`Created sandbox for game ${gameId}`, {
     "game.id": gameId,
@@ -70,7 +70,7 @@ export async function createGameSandbox(
  * rather than by the id on the row, because the row is not a complete record of
  * them: the id is written last, so a crash in between leaves a sandbox that is
  * running and labelled and that nothing points at. A delete has to take those
- * with it — a sandbox nobody can reach still bills. `sandboxId` is passed in
+ * with it - a sandbox nobody can reach still bills. `sandboxId` is passed in
  * as well for the opposite case, a row naming a sandbox the label search
  * misses, and is skipped when the search already found it.
  *
@@ -94,7 +94,7 @@ export async function deleteGameSandboxes(
       sandboxes.set(sandboxId, await daytona.get(sandboxId))
     } catch (error) {
       // Almost always a sandbox that is already gone, which is nothing to
-      // delete and no reason to fail — but it is also the only signal that a
+      // delete and no reason to fail - but it is also the only signal that a
       // row and Daytona disagree, so it is a warning rather than a swallow.
       logger.warn(
         logger.fmt`Could not fetch sandbox ${sandboxId} of game ${gameId} to delete it`,
@@ -161,7 +161,7 @@ export async function deleteGameSandboxes(
  * a tool asks for the game's sandbox and either gets a usable one or an error.
  *
  * `onChatStart` already creates the sandbox before the first turn streams, so
- * the create path here is a fallback — it covers games that predate sandboxes
+ * the create path here is a fallback - it covers games that predate sandboxes
  * and a first turn whose creation crashed. Sandboxes also stop themselves once
  * idle, which is the common case for a thread resumed after a while.
  */
@@ -176,7 +176,7 @@ export async function getGameSandbox(
 
   if (!game) {
     // A tool call naming a game that isn't there means the session outlived
-    // its row, which no ordinary path produces — worth a line of its own
+    // its row, which no ordinary path produces - worth a line of its own
     // before the throw, since the throw only says which id was missing.
     logger.error(logger.fmt`No game ${gameId} to get a sandbox for`, {
       "game.id": gameId,
@@ -220,7 +220,7 @@ export async function getGameSandbox(
 
 // The port the game's static server listens on inside the sandbox. Nothing
 // else in the sandbox uses it; it just has to be a value the server and the
-// preview link agree on — hence exported, for whoever mints that link.
+// preview link agree on - hence exported, for whoever mints that link.
 export const PREVIEW_PORT = 3000
 
 // Daytona signs preview urls for 60 seconds by default, which would expire
@@ -239,7 +239,7 @@ const START_RETRIES = 10
  * Starts (or reuses) the static server for a game's sandbox, and hands back the
  * running sandbox for the caller to mint a preview url from.
  *
- * Idempotent by design — this runs on every preview load. A health check comes
+ * Idempotent by design - this runs on every preview load. A health check comes
  * first, and only a port with nothing on it gets a new server: a second
  * `http.server` on the same port would exit on "address already in use" and
  * take the log with it, so spawning blindly would be both wasteful and
@@ -274,7 +274,7 @@ export async function startGameServer(
       const log = await sandbox.process.executeCommand(`cat ${SERVER_LOG}`)
       const output = log.result.trim() || "no output"
 
-      // The server's own stderr, which the exception below also carries — but
+      // The server's own stderr, which the exception below also carries - but
       // as a log it is searchable across sandboxes, which is how a systemic
       // failure (a base image without python3, a port taken by something else)
       // reads as one thing rather than as scattered 500s.
@@ -312,7 +312,7 @@ export async function startGameServer(
  * Whether something is already answering HTTP on the preview port.
  *
  * `retries` is curl's own retry loop, which keeps the waiting on the sandbox
- * side — one exec that returns when the server is up, rather than a poll that
+ * side - one exec that returns when the server is up, rather than a poll that
  * pays a round-trip per attempt. `--retry-connrefused` is what makes it treat
  * a port nothing has bound yet as worth retrying.
  */

@@ -105,7 +105,7 @@ export function AppSidebar({
                         `SidebarMenuAction` so it sits inside the row rather
                         than beside it: the row is a link, and a button nested
                         in one would be a link that is sometimes not. Hidden
-                        until the row is hovered or focused — and, once the
+                        until the row is hovered or focused - and, once the
                         menu is open, kept visible by the trigger's
                         `aria-expanded`. */}
                     <GameMenu

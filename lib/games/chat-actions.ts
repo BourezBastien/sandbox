@@ -26,7 +26,7 @@ export async function startGameChatSession(
     const session = await startSession(params)
 
     // The handover from the web app to the Trigger.dev worker. Logged on both
-    // sides — `trigger/chat.ts` records the turn this starts — so a thread that
+    // sides - `trigger/chat.ts` records the turn this starts - so a thread that
     // never streams can be placed on one side of the boundary or the other.
     Sentry.logger.info(
       Sentry.logger.fmt`Started chat session for game ${params.chatId}`,
@@ -36,8 +36,16 @@ export async function startGameChatSession(
     return session
   } catch (error) {
     // Idempotent on (environment, chatId), so this is not a second tab losing
-    // a race — it is the session genuinely failing to start, which leaves the
+    // a race - it is the session genuinely failing to start, which leaves the
     // player with a composer that does nothing.
+    //
+    // console.error in addition to Sentry: without Sentry configured, the
+    // structured log goes nowhere and the failure is invisible in Dokploy's
+    // logs - which are the only place to look from a classroom.
+    console.error(
+      `[chat] Could not start chat session for game ${params.chatId}:`,
+      error
+    )
     Sentry.logger.error(
       Sentry.logger.fmt`Could not start chat session for game ${params.chatId}`,
       {
@@ -52,7 +60,7 @@ export async function startGameChatSession(
 }
 
 /**
- * Pure mint — the transport calls this on a 401/403 to refresh an expired
+ * Pure mint - the transport calls this on a 401/403 to refresh an expired
  * token. Runs on the server, so `TRIGGER_SECRET_KEY` never reaches the browser.
  */
 export async function mintGameChatAccessToken(chatId: string) {

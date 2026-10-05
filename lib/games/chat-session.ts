@@ -10,17 +10,17 @@ import { describeError } from "@/lib/observability"
  *
  * The session outlives the page, so deleting a game has to reach into
  * Trigger.dev as well as the database: a turn left streaming would keep calling
- * tools against a game that no longer exists and — until the row is gone —
+ * tools against a game that no longer exists and - until the row is gone -
  * could still create a sandbox nothing points at.
  *
  * The cancel comes first because closing does not stop a run: it flips
  * `closedAt` so further messages are rejected, which settles the next turn and
  * not the current one. Closing is terminal and the chat id is the game id, so
- * this is one-way — that is fine for a game being deleted and wrong for
+ * this is one-way - that is fine for a game being deleted and wrong for
  * anything else.
  *
  * Nothing here throws. Every failure leaves a session that is already unusable
- * — its game is about to go — and the delete it belongs to has more important
+ * - its game is about to go - and the delete it belongs to has more important
  * work behind it.
  */
 export async function endGameChatSession(gameId: string): Promise<void> {
@@ -73,7 +73,7 @@ export async function endGameChatSession(gameId: string): Promise<void> {
  * Cancels whatever run a game's chat session has going, and stops there.
  *
  * The sibling of `endGameChatSession` for a block rather than a delete:
- * closing a session is terminal — the thread could never send another turn —
+ * closing a session is terminal - the thread could never send another turn -
  * which is the right finality for a game being thrown away and the wrong one
  * for a student who may be unblocked next week. Cancelling the run stops the
  * in-flight build mid-stream while leaving the session able to accept the
@@ -103,7 +103,7 @@ export async function cancelGameChatRun(gameId: string): Promise<void> {
   try {
     await runs.cancel(currentRunId)
   } catch (error) {
-    // A run that finished on its own between the retrieve and this call —
+    // A run that finished on its own between the retrieve and this call -
     // which is the outcome a block wants anyway.
     Sentry.logger.debug(
       Sentry.logger.fmt`Could not cancel run ${currentRunId} of game ${gameId}`,

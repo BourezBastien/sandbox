@@ -15,17 +15,17 @@ import {
  * The starting points offered under the home page composer.
  *
  * The label is what the button says; the prompt is what is actually built. They
- * are deliberately different lengths — a button has room for two words, and the
+ * are deliberately different lengths - a button has room for two words, and the
  * agent needs a brief. So each prompt says what the player does, what it looks
  * like, and how a round ends, because a first turn spent guessing at those is
  * a first turn that produces someone else's game.
  *
  * They stay in the player's voice rather than the agent's: nothing here names
  * a file, an engine primitive, or a three.js class. The system prompt in
- * `@/lib/games/instructions` already covers how a game is built — these only
+ * `@/lib/games/instructions` already covers how a game is built - these only
  * have to settle what to build.
  *
- * Multiplayer here means local multiplayer — two players on one keyboard —
+ * Multiplayer here means local multiplayer - two players on one keyboard -
  * which the engine's input bindings genuinely support. Online multiplayer has
  * no place in this list: a game is static files behind a plain HTTP server, so
  * there is nothing for two browsers to talk through.
@@ -47,7 +47,7 @@ export const suggestions = [
     prompt:
       "Un jeu d'exploration du système solaire : je pilote une petite sonde spatiale entre les huit planètes, " +
       "avec des distances et tailles suggérées mais un système raccourci pour rester jouable. Approcher une " +
-      "planète ouvre sa fiche — nom, taille, distance au Soleil, particularité — puis pose une question à " +
+      "planète ouvre sa fiche (nom, taille, distance au Soleil, particularité) puis pose une question à " +
       "choix multiples ; répondre juste valide la visite sur une carte de mission. Le Soleil est une étoile " +
       "chaude qu'il ne faut pas survoler de trop près. Missions accomplies quand les huit planètes sont " +
       "validées ; le carburant de la sonde est la limite.",
@@ -77,7 +77,7 @@ export const suggestions = [
     icon: CoffeeIcon,
     prompt:
       "Un jeu de gestion : je tiens le snack du collège pendant la récréation. Les élèves débarquent par vagues " +
-      "avec des commandes différentes — croissant, jus, sandwich — que je prépare sur des postes de travail, " +
+      "avec des commandes différentes (croissant, jus, sandwich) que je prépare sur des postes de travail, " +
       "sers et encaisse avant qu'ils ne s'impatientent et repartent. Une journée dure quelques minutes, " +
       "l'argent gagné débloque de nouvelles recettes et un deuxième poste de préparation, et la file " +
       "d'attente se lit d'un coup d'œil. Réussir la journée, c'est servir trente clients sans en faire fuir " +
@@ -87,8 +87,8 @@ export const suggestions = [
     label: "Base spatiale",
     icon: RocketIcon,
     prompt:
-      "Un jeu de gestion d'une base spatiale sur Mars : je construis des modules — serre, panneau solaire, " +
-      "dortoir, extracteur d'eau — sur une grille de terrain martien, et je dois équilibrer énergie, oxygène " +
+      "Un jeu de gestion d'une base spatiale sur Mars : je construis des modules (serre, panneau solaire, " +
+      "dortoir, extracteur d'eau) sur une grille de terrain martien, et je dois équilibrer énergie, oxygène " +
       "et nourriture de mes colons. Des incidents tombent régulièrement : tempête de sable qui masque les " +
       "panneaux, fuite dans une serre, et demandent une réparation rapide au risque d'un effet en cascade. La " +
       "base grandit module par module ; la partie est gagnée quand la base accueille cent colons, perdue si " +

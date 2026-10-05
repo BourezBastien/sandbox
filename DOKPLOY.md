@@ -1,4 +1,4 @@
-# Sandbox — Déploiement Dokploy (guide complet)
+# Sandbox : Déploiement Dokploy (guide complet)
 
 ## Architecture
 
@@ -6,18 +6,18 @@
 |---------|-------------|--------|------|
 | PostgreSQL | Database | Image intégrée Dokploy | 5432 (à exposer publiquement) |
 | Sandbox (app) | Application | GitHub → Dockerfile | 3000 |
-| Worker Trigger.dev | Cloud Trigger.dev | Déployé par le conteneur au démarrage | — |
+| Worker Trigger.dev | Cloud Trigger.dev | Déployé par le conteneur au démarrage | (aucun) |
 
 > L'agent qui construit les jeux tourne chez Trigger.dev (cloud), pas sur votre
 > serveur. Le conteneur de l'application lui **envoie le code automatiquement
-> à chaque démarrage** (une fois par conteneur) — rien à lancer en local, pas
+> à chaque démarrage** (une fois par conteneur) : rien à lancer en local, pas
 > de GitHub Action. Il a besoin de joindre PostgreSQL : c'est la seule raison
 > pour laquelle la base doit être **exposée publiquement** (SSL + mot de passe
 > long).
 
 ---
 
-## Étape 0 — Préparer les comptes (une fois)
+## Étape 0 : Préparer les comptes (une fois)
 
 1. **Trigger.dev** : créez un projet sur [cloud.trigger.dev](https://cloud.trigger.dev)
    (plan Hobby $10/mois recommandé : 50 tours simultanés pour la classe).
@@ -26,7 +26,7 @@
 
    Puis générez un **Personal Access Token** sur
    [cloud.trigger.dev/account/tokens](https://cloud.trigger.dev/account/tokens)
-   (`TRIGGER_ACCESS_TOKEN`) — c'est ce qui authentifie le déploiement du
+   (`TRIGGER_ACCESS_TOKEN`) : c'est ce qui authentifie le déploiement du
    worker depuis le conteneur. Ne le partagez pas : c'est une clé de compte.
 
    Enfin, dans *Project Settings → Environment Variables*, ajoutez pour
@@ -47,12 +47,12 @@
 
 ---
 
-## Étape 1 — Créer le projet Dokploy
+## Étape 1 : Créer le projet Dokploy
 
 1. Ouvrez Dokply : `http://IP-SERVEUR:3000`
 2. **New Project** → nom : `sandbox`
 
-## Étape 2 — PostgreSQL
+## Étape 2 : PostgreSQL
 
 1. Dans le projet : **New → Database → PostgreSQL**, nom : `sandbox-db`
 2. Après création, onglet **Connection Info** : copiez la `DATABASE_URL`
@@ -67,16 +67,16 @@
    (`postgres://user:pass@VOTRE-DOMINE-DB:5432/sandbox`).
    Utilisez un **mot de passe long** et gardez le SSL activé.
 
-## Étape 3 — Connecter GitHub
+## Étape 3 : Connecter GitHub
 
 1. **Settings → GitHub → Install GitHub App**
 2. Autorisez le repo `BourezBastien/sandbox`
 
-## Étape 4 — Déployer l'application
+## Étape 4 : Déployer l'application
 
 1. **New → Application**, nom : `sandbox-app`
 2. **Source** : GitHub, repo `BourezBastien/sandbox`, branche `main`
-3. **Build Type** : `Dockerfile` — chemin : `Dockerfile`, contexte : `/`
+3. **Build Type** : `Dockerfile`. Chemin : `Dockerfile`, contexte : `/`
 4. **Port** : `3000`
 
 ### Variables d'environnement (onglet Environment)
@@ -84,10 +84,10 @@
 ```env
 NODE_ENV=production
 
-# Étape 2 — URL interne
+# Étape 2 : URL interne
 DATABASE_URL=postgresql://...@sandbox-db:5432/sandbox
 
-# Auth — secret de 32+ caractères : openssl rand -base64 32
+# Auth : secret de 32+ caractères (openssl rand -base64 32)
 BETTER_AUTH_SECRET=
 # URL publique de l'app (celle du domaine créé à l'étape 5)
 BETTER_AUTH_URL=https://games.oxanaut.app
@@ -100,14 +100,14 @@ Z_AI_API_KEY=
 # Daytona
 DAYTONA_API_KEY=
 
-# Worker Trigger.dev — déployé automatiquement par le conteneur au démarrage.
+# Worker Trigger.dev : déployé automatiquement par le conteneur au démarrage.
 # L'app parle à Trigger.dev avec TRIGGER_SECRET_KEY (clé du projet) ;
 # le déploiement du worker s'authentifie avec TRIGGER_ACCESS_TOKEN (clé de compte).
 TRIGGER_SECRET_KEY=
 TRIGGER_PROJECT_REF=
 TRIGGER_ACCESS_TOKEN=
 
-# Optionnel — Sentry
+# Optionnel : Sentry
 # SENTRY_DSN=
 # SENTRY_ORG=
 # SENTRY_PROJECT=
@@ -117,7 +117,7 @@ TRIGGER_ACCESS_TOKEN=
 
 > Deux choses se font **automatiquement au démarrage du conteneur**
 > (`docker-entrypoint.sh`) : l'application du schéma de la base
-> (`drizzle-kit push`), puis le déploiement du worker Trigger.dev — une seule
+> (`drizzle-kit push`), puis le déploiement du worker Trigger.dev. Une seule
 > fois par conteneur, pas à chaque redémarrage. Coupes possibles :
 > `DB_PUSH_ON_START=false`, `TRIGGER_DEPLOY_ON_START=false`.
 
@@ -131,13 +131,13 @@ TRIGGER_ACCESS_TOKEN=
    >> Worker déployé.
    ```
 
-## Étape 5 — Domaine
+## Étape 5 : Domaine
 
 1. Onglet **Domains → New Domain** : `games.oxanaut.app`, port `3000`
 2. SSL automatique (Let's Encrypt)
 3. Mettez à jour `BETTER_AUTH_URL` avec cette adresse et redeployez
 
-## Étape 6 — Le worker Trigger.dev
+## Étape 6 : Le worker Trigger.dev
 
 Rien à faire : le conteneur l'a déployé au démarrage (étape 4, tant que
 `TRIGGER_SECRET_KEY` et `TRIGGER_PROJECT_REF` sont dans les variables).
@@ -145,9 +145,9 @@ Rien à faire : le conteneur l'a déployé au démarrage (étape 4, tant que
 Vérifiez sur cloud.trigger.dev : le task **`game-chat`** doit apparaître comme
 déployé en production. Les variables d'exécution du worker (`DATABASE_URL`
 publique, `Z_AI_API_KEY`, `DAYTONA_API_KEY`) restent dans le dashboard
-Trigger.dev (étape 0) — c'est Trigger.dev qui les injecte dans ses runs.
+Trigger.dev (étape 0). C'est Trigger.dev qui les injecte dans ses runs.
 
-## Étape 7 — Mise en service
+## Étape 7 : Mise en service
 
 1. Ouvrez `https://games.oxanaut.app/install`
 2. Créez le compte admin (une seule fois, la page se verrouille après)
@@ -172,8 +172,8 @@ curl -I https://games.oxanaut.app
 |----------|----------|
 | Logs : `Échec du push du schéma` | Vérifiez `DATABASE_URL` (doit pointer vers `sandbox-db`) |
 | Logs : `TRIGGER_ACCESS_TOKEN / TRIGGER_PROJECT_REF absents` | Ajoutez-les dans l'onglet Environment, puis redeployez |
-| Logs : `Échec du déploiement du worker` | Vérifiez le token (cloud.trigger.dev/account/tokens) et la réf projet — le conteneur a démarré quand même, redeployez après correction |
-| `/install` redirige vers `/sign-in` | Un admin existe déjà — la base n'est pas vide |
+| Logs : `Échec du déploiement du worker` | Vérifiez le token (cloud.trigger.dev/account/tokens) et la réf projet. Le conteneur a démarré quand même : redeployez après correction |
+| `/install` redirige vers `/sign-in` | Un admin existe déjà, la base n'est pas vide |
 | Erreur 500 au premier tour de jeu | Vérifiez `Z_AI_API_KEY` (app) **et** chez Trigger.dev |
 | `Game has no sandbox yet` persistant | Vérifiez `DAYTONA_API_KEY` chez Trigger.dev |
 | Le run Trigger échoue : connexion DB | Le worker utilise l'URL **publique** de la base (étape 2.3) |

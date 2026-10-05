@@ -1,8 +1,8 @@
 /**
  * How long a game's title may be.
  *
- * Titles are rendered on one line in two places — the sidebar's list and the
- * game header — so this is a display limit rather than a storage one. It lives
+ * Titles are rendered on one line in two places - the sidebar's list and the
+ * game header - so this is a display limit rather than a storage one. It lives
  * here rather than beside the actions that enforce it because the rename dialog
  * caps its input at the same number, and a client component cannot import a
  * `"use server"` module's constants: every export of one has to be an action.

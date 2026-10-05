@@ -16,10 +16,10 @@ import { suggestions } from "@/lib/games/suggestions"
  * `ChatComposer` its `onValueChange`/`onSubmit` callbacks, so the prompt state
  * and the `createGame` call live here.
  *
- * `createGame` redirects to the new game, so the prompt is left in place — it
+ * `createGame` redirects to the new game, so the prompt is left in place - it
  * is only still on screen if the create failed. The same is true of the model:
  * the pick is state here and an argument to `createGame`, which carries it to
- * the thread — this component never sees the game it opens.
+ * the thread - this component never sees the game it opens.
  *
  * The suggestions sit inside this boundary rather than on the page because
  * clicking one is a submit: it needs the same action and the same model pick as
@@ -40,7 +40,7 @@ export function NewGameComposer() {
   function handleSuggestion(suggestionPrompt: string) {
     // Into the box as well as into the action: on the happy path the redirect
     // means nobody sees it, but if the create fails the player is left looking
-    // at the prompt that failed rather than an empty composer — the same
+    // at the prompt that failed rather than an empty composer - the same
     // bargain the typed path already makes.
     setPrompt(suggestionPrompt)
     handleSubmit(suggestionPrompt)

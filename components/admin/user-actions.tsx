@@ -55,7 +55,7 @@ import { Spinner } from "@/components/ui/spinner"
 /**
  * The error text every dialog here falls back to. Server Action errors arrive
  * stripped of their message in production, so the thrown message is only ever
- * a bonus in dev — the copy assumes the worst case and says what to do next.
+ * a bonus in dev - the copy assumes the worst case and says what to do next.
  */
 const GENERIC_ERROR = "Cela n'a pas fonctionné. Réessayez."
 
@@ -132,7 +132,7 @@ export function CreateUserButton() {
                 id="create-name"
                 name="name"
                 disabled={isPending}
-                placeholder="Facultatif — par défaut, l'identifiant"
+                placeholder="Facultatif. Par défaut : l'identifiant"
               />
             </Field>
             <Field>
@@ -229,7 +229,7 @@ export function UserActions({
             Réinitialiser le mot de passe
           </DropdownMenuItem>
           {/* A confirmation would only slow down the mid-class "put that
-              away" — and unlike a block, everything works again on the next
+              away" - and unlike a block, everything works again on the next
               sign-in. */}
           <DropdownMenuItem onClick={() => run(() => forceSignOut({ userId }))}>
             <LogOutIcon />

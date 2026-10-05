@@ -3,7 +3,7 @@
 <br />
 <br />
 
-<h1>Sandbox — édition collège</h1>
+<h1>Sandbox : édition collège</h1>
 
 <p><strong>Décrivez un jeu. Regardez-le se construire. Jouez-y dans le navigateur.</strong></p>
 
@@ -40,20 +40,20 @@ flowchart LR
     A2[Admin : /admin] -->|comptes, blocage, vue des jeux| B
 ```
 
-1. **Créer** — l'élève décrit son jeu sur la page d'accueil ; le jeu s'ouvre avec le premier message déjà envoyé.
-2. **Bac à sable** — le premier tour crée un bac à sable Daytona dédié et y dépose le moteur three.js.
-3. **Brief** — l'agent pose ses questions de conception une par une (`ask_player`), chaque réponse relance le tour.
-4. **Construction** — le modèle GLM écrit et modifie les fichiers du jeu via des outils confinés au répertoire du jeu.
-5. **Aperçu** — une route serveur démarre un serveur statique dans le bac à sable et signe une URL pour l'iframe.
-6. **Persistance** — chaque tour terminé enregistre les messages et le curseur de session ; un rechargement reprend un tour interrompu.
+1. **Créer** : l'élève décrit son jeu sur la page d'accueil ; le jeu s'ouvre avec le premier message déjà envoyé.
+2. **Bac à sable** : le premier tour crée un bac à sable Daytona dédié et y dépose le moteur three.js.
+3. **Brief** : l'agent pose ses questions de conception une par une (`ask_player`), chaque réponse relance le tour.
+4. **Construction** : le modèle GLM écrit et modifie les fichiers du jeu via des outils confinés au répertoire du jeu.
+5. **Aperçu** : une route serveur démarre un serveur statique dans le bac à sable et signe une URL pour l'iframe.
+6. **Persistance** : chaque tour terminé enregistre les messages et le curseur de session ; un rechargement reprend un tour interrompu.
 
-> **Multijoueur** : en ligne, non — chaque jeu est un ensemble de fichiers statiques servis par un simple serveur HTTP, il n'y a rien par quoi deux navigateurs pourraient communiquer. En **local** (deux joueurs sur le même clavier, écran partagé, tour par tour), oui — les exemples « Course à deux » et « Duel de tanks » de la page d'accueil en sont la preuve.
+> **Multijoueur** : en ligne, non. Chaque jeu est un ensemble de fichiers statiques servis par un simple serveur HTTP, il n'y a rien par quoi deux navigateurs pourraient communiquer. En **local** (deux joueurs sur le même clavier, écran partagé, tour par tour), oui : les exemples « Course à deux » et « Duel de tanks » de la page d'accueil en sont la preuve.
 
 ## Rôles et sécurité
 
-- **Admin** — créé une fois pour toutes sur `/install` au premier déploiement. Gère les comptes (`/admin/users`), voit et ouvre tous les jeux (`/admin/games`), bloque en temps réel.
-- **Élève** — ne voit que ses propres jeux. Aucune auto-inscription : les comptes sont créés par l'admin.
-- **Blocage** — bloquer un compte révoque immédiatement toutes ses sessions (l'onglet ouvert est expulsé à la requête suivante), annule les constructions en cours, et l'agent refuse ses tours. Débloquer permet de se reconnecter avec tout en place.
+- **Admin** : créé une fois pour toutes sur `/install` au premier déploiement. Gère les comptes (`/admin/users`), voit et ouvre tous les jeux (`/admin/games`), bloque en temps réel.
+- **Élève** : ne voit que ses propres jeux. Aucune auto-inscription : les comptes sont créés par l'admin.
+- **Blocage** : bloquer un compte révoque immédiatement toutes ses sessions (l'onglet ouvert est expulsé à la requête suivante), annule les constructions en cours, et l'agent refuse ses tours. Débloquer permet de se reconnecter avec tout en place.
 - Les mots de passe sont hachés (scrypt) par Better Auth ; la connexion est limitée en rythme (anti-force brute) et les sessions sont revérifiées en base à chaque requête.
 
 ---
@@ -75,18 +75,18 @@ Ouvrez `http://localhost:3000/install` pour créer le compte admin, puis créez 
 | Variable | Rôle |
 | --- | --- |
 | `DATABASE_URL` | Connexion Postgres (Dokploy en production) |
-| `BETTER_AUTH_SECRET` | Secret de chiffrement des sessions — 32+ caractères (`openssl rand -base64 32`) |
+| `BETTER_AUTH_SECRET` | Secret de chiffrement des sessions, 32+ caractères (`openssl rand -base64 32`) |
 | `BETTER_AUTH_URL` | URL publique de l'app (ex. `https://sandbox.mon-college.fr`) |
-| `BETTER_AUTH_TRUSTED_ORIGINS` | Optionnel — origines autorisées, séparées par des virgules |
+| `BETTER_AUTH_TRUSTED_ORIGINS` | Optionnel : origines autorisées, séparées par des virgules |
 | `Z_AI_API_KEY` | Clé z.ai (voir ci-dessous) |
-| `Z_AI_BASE_URL` | Optionnel — endpoint Anthropic-compatible (`https://api.z.ai/api/anthropic` par défaut) |
+| `Z_AI_BASE_URL` | Optionnel : endpoint Anthropic-compatible (`https://api.z.ai/api/anthropic` par défaut) |
 | `TRIGGER_SECRET_KEY` | Clé du projet Trigger.dev (doit aussi être définie dans l'environnement du worker) |
 | `DAYTONA_API_KEY` | Clé Daytona pour les bacs à sable |
-| `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` | Optionnel — Sentry (erreurs, logs, source maps) |
+| `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` | Optionnel : Sentry (erreurs, logs, source maps) |
 
 ### IA : z.ai (GLM)
 
-Le code parle à l'endpoint **Anthropic-compatible** de z.ai (`https://api.z.ai/api/anthropic`) via `@ai-sdk/anthropic` — seule l'URL et la clé changent. Trois modèles sont proposés dans le sélecteur :
+Le code parle à l'endpoint **Anthropic-compatible** de z.ai (`https://api.z.ai/api/anthropic`) via `@ai-sdk/anthropic`. Seule l'URL et la clé changent. Trois modèles sont proposés dans le sélecteur :
 
 | Modèle | id | Prix (par M de tokens, entrée / sortie) |
 | --- | --- | --- |
@@ -94,18 +94,18 @@ Le code parle à l'endpoint **Anthropic-compatible** de z.ai (`https://api.z.ai/
 | GLM 4.5 Air | `glm-4.5-air` | $0.20 / $1.10 |
 | GLM 4.7 Flash | `glm-4.7-flash` | gratuit |
 
-> **Clé d'abonnement vs clé API** : une clé « GLM Coding Plan » fonctionne sur le même endpoint pour tester seul, mais ses limites de prompts par tranche de 5 h ne conviennent pas à une classe entière. Pour les séances réelles, créez une clé API facturée à l'usage sur [api.z.ai](https://api.z.ai) — avec l'usage décrit ci-dessous, cela représente quelques dollars par mois.
+> **Clé d'abonnement vs clé API** : une clé « GLM Coding Plan » fonctionne sur le même endpoint pour tester seul, mais ses limites de prompts par tranche de 5 h ne conviennent pas à une classe entière. Pour les séances réelles, créez une clé API facturée à l'usage sur [api.z.ai](https://api.z.ai). Avec l'usage décrit ci-dessous, cela représente quelques dollars par mois.
 
 ---
 
 ## Déploiement (Dokploy + Trigger.dev Cloud)
 
-> **Le guide pas-à-pas complet est dans [DOKPLOY.md](./DOKPLOY.md)** — PostgreSQL, application (Dockerfile), worker, domaine, mise en service et dépannage.
+> **Le guide pas-à-pas complet est dans [DOKPLOY.md](./DOKPLOY.md)** : PostgreSQL, application (Dockerfile), worker, domaine, mise en service et dépannage.
 
 L'essentiel :
 
 - **Application** : Dokploy build le `Dockerfile` du repo (port 3000). Au démarrage du conteneur, deux choses se font toutes seules (`docker-entrypoint.sh`) : l'application du schéma à la base (`drizzle-kit push`), puis le **déploiement du worker Trigger.dev** (une fois par conteneur). Coupes possibles : `DB_PUSH_ON_START=false`, `TRIGGER_DEPLOY_ON_START=false`.
-- **Worker Trigger.dev** : le code de l'agent (`trigger/`) est envoyé à Trigger.dev Cloud par le conteneur au démarrage — rien à lancer en local, pas de GitHub Action. Les variables d'exécution du worker (`DATABASE_URL` publique, `Z_AI_API_KEY`, `DAYTONA_API_KEY`) se définissent dans le dashboard Trigger.dev.
+- **Worker Trigger.dev** : le code de l'agent (`trigger/`) est envoyé à Trigger.dev Cloud par le conteneur au démarrage. Rien à lancer en local, pas de GitHub Action. Les variables d'exécution du worker (`DATABASE_URL` publique, `Z_AI_API_KEY`, `DAYTONA_API_KEY`) se définissent dans le dashboard Trigger.dev.
 - **PostgreSQL** : service Dokploy, exposé publiquement (SSL + mot de passe long) pour que le worker cloud puisse le joindre.
 
 ### Résumé des variables
@@ -123,7 +123,7 @@ L'essentiel :
 | --- | --- |
 | Dokploy (app + Postgres) | votre serveur existant |
 | Trigger.dev Hobby | $10/mois (le calcul de la classe ≈ $1.50/mois, largement dans les crédits inclus) |
-| Daytona | ≈ $0 — les $200 de crédits offerts couvrent des années à ce rythme (bacs à sable auto-stoppés quand inactifs) |
+| Daytona | ≈ $0 : les $200 de crédits offerts couvrent des années à ce rythme (bacs à sable auto-stoppés quand inactifs) |
 | z.ai | ≈ $10–20/mois avec GLM 4.7 en défaut ; ~$5 avec Air ; $0 avec Flash |
 
 Sources : [tarifs z.ai](https://docs.z.ai/guides/overview/pricing), [tarifs Trigger.dev](https://trigger.dev/pricing), [tarifs Daytona](https://www.daytona.io/pricing).

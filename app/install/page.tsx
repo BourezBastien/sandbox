@@ -10,13 +10,13 @@ export const metadata: Metadata = {
 }
 
 // The answer changes the moment the admin exists, and the check is a database
-// query — never something to freeze into a build-time page.
+// query - never something to freeze into a build-time page.
 export const dynamic = "force-dynamic"
 
 export default async function InstallPage() {
   // The page exists for exactly one deployment-time moment: before the first
   // admin. After that it is a dead end that says so, rather than a form that
-  // throws — anyone landing here post-install has nothing to do and no
+  // throws - anyone landing here post-install has nothing to do and no
   // reason to see an error about it.
   const installed = await adminExists()
 

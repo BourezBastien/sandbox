@@ -11,8 +11,8 @@ import { getGame } from "@/lib/games/queries"
  *
  * Server Actions are reachable by direct POST, so the game id arrives from the
  * browser and the caller is resolved from the session rather than trusted
- * from the request. Shared between the chat actions — which hand out tokens
- * for a game's thread — and the actions that rename or delete a game, because
+ * from the request. Shared between the chat actions - which hand out tokens
+ * for a game's thread - and the actions that rename or delete a game, because
  * "signed in" is not the same as "entitled to this game" for any of them.
  *
  * The admin passes this check for any game, not just their own: opening a
@@ -32,7 +32,7 @@ export async function authorizeGame(
   // These two rejections are the app's authorization boundary, and a boundary
   // nobody can see is a boundary nobody can tell is holding. Both are warnings
   // rather than errors: a signed-out tab left open produces the first and a
-  // stale bookmark the second, so neither is on its own a problem — a run of
+  // stale bookmark the second, so neither is on its own a problem - a run of
   // them from one caller is.
   if (!user) {
     Sentry.logger.warn(
@@ -47,7 +47,7 @@ export async function authorizeGame(
     throw new Error("Unauthorized")
   }
 
-  // Also the ownership check — `getGame` only resolves games the caller owns,
+  // Also the ownership check - `getGame` only resolves games the caller owns,
   // or any game at all for the admin.
   const game = await getGame(gameId)
 
@@ -68,7 +68,7 @@ export async function authorizeGame(
   // Tags rather than scope attributes, and for events rather than logs:
   // attributes set on a scope never reach logs, and the logs in the callers
   // name the game explicitly anyway. What this buys is that a throw further
-  // down — the Trigger handover, a sandbox that won't delete — arrives already
+  // down - the Trigger handover, a sandbox that won't delete - arrives already
   // saying which game and caller it was.
   //
   // Per-request rather than global, so one caller's identity cannot leak into

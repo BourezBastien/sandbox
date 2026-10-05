@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server"
 /**
  * A cheap presence check, not the boundary: pages and server actions resolve
  * the real session against the database (see `@/lib/auth`). All this does is
- * move a signed-out visitor to sign-in before a page renders — Next 16's docs
+ * move a signed-out visitor to sign-in before a page renders - Next 16's docs
  * are explicit that Proxy must never be the only guard, because Server
  * Functions are POSTs to page routes and a matcher change can silently skip
  * them.
