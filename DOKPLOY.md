@@ -90,7 +90,9 @@ DATABASE_URL=postgresql://...@sandbox-db:5432/sandbox
 # Auth — secret de 32+ caractères : openssl rand -base64 32
 BETTER_AUTH_SECRET=
 # URL publique de l'app (celle du domaine créé à l'étape 5)
-BETTER_AUTH_URL=https://sandbox.votre-domaine.fr
+BETTER_AUTH_URL=https://games.oxanaut.app
+# Origines de confiance pour les requêtes d'authentification
+BETTER_AUTH_TRUSTED_ORIGINS=https://games.oxanaut.app
 
 # IA
 Z_AI_API_KEY=
@@ -131,7 +133,7 @@ TRIGGER_ACCESS_TOKEN=
 
 ## Étape 5 — Domaine
 
-1. Onglet **Domains → New Domain** : `sandbox.votre-domaine.fr`, port `3000`
+1. Onglet **Domains → New Domain** : `games.oxanaut.app`, port `3000`
 2. SSL automatique (Let's Encrypt)
 3. Mettez à jour `BETTER_AUTH_URL` avec cette adresse et redeployez
 
@@ -147,7 +149,7 @@ Trigger.dev (étape 0) — c'est Trigger.dev qui les injecte dans ses runs.
 
 ## Étape 7 — Mise en service
 
-1. Ouvrez `https://sandbox.votre-domaine.fr/install`
+1. Ouvrez `https://games.oxanaut.app/install`
 2. Créez le compte admin (une seule fois, la page se verrouille après)
 3. `/admin/users` → créez les comptes élèves (identifiant + mot de passe)
 4. Les élèves se connectent sur `/sign-in`
@@ -158,7 +160,7 @@ Trigger.dev (étape 0) — c'est Trigger.dev qui les injecte dans ses runs.
 
 ```bash
 # L'app répond ( redirection vers /sign-in)
-curl -I https://sandbox.votre-domaine.fr
+curl -I https://games.oxanaut.app
 
 # Le worker est en ligne : envoyez "hello" dans un jeu et regardez
 # le run apparaître sur cloud.trigger.dev

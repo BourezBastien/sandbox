@@ -19,11 +19,11 @@ const fontLogo = Fraunces({
 
 export const metadata: Metadata = {
   title: {
-    default: "Sandbox — Build 3D games with AI",
+    default: "Sandbox — Crée des jeux 3D avec l'IA",
     template: "%s · Sandbox",
   },
   description:
-    "Describe a game and watch it come to life. Sandbox is an agentic three.js game builder that plans the scene, writes the code, and streams playable worlds from plain English.",
+    "Décris un jeu et regarde-le prendre vie. Sandbox est un atelier de création de jeux 3D par IA : il pose les bonnes questions, écrit le code et fait naître des mondes jouables à partir de tes mots.",
 }
 
 export default function RootLayout({
@@ -33,7 +33,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="fr"
       suppressHydrationWarning
       className={cn(
         "antialiased",

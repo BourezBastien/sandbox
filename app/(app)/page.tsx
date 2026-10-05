@@ -19,11 +19,12 @@ export default async function Page() {
             <Image src="/logo.svg" alt="Logo" width={48} height={48} />
           </EmptyMedia>
           <EmptyTitle className="text-2xl">
-            What should we build today?
+            Qu&apos;est-ce qu&apos;on construit aujourd&apos;hui&nbsp;?
           </EmptyTitle>
           <EmptyDescription>
-            Build your own racers, shooters, puzzles and whole worlds using your
-            own words. If you can describe it, you can play it.
+            Crée tes propres courses, jeux de tir, casse-têtes et des mondes
+            entiers avec tes propres mots. Si tu peux le décrire, tu peux y
+            jouer.
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent className="max-w-2xl gap-6">

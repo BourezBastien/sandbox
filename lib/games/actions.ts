@@ -40,9 +40,10 @@ async function generateTitle(prompt: string) {
     const { text } = await generateText({
       model: gameModels[TITLE_MODEL],
       instructions:
-        "You name games from the prompt that created them. Reply with a title " +
-        "of at most four words in title case. No quotes, no punctuation at the " +
-        "end, no explanation — the title only.",
+        "Tu nommes des jeux à partir du message qui les a créés. Réponds en " +
+        "français, avec un titre d'au plus quatre mots avec une majuscule au " +
+        "début. Pas de guillemets, pas de ponctuation finale, pas " +
+        "d'explication — uniquement le titre.",
       prompt,
       maxOutputTokens: 32,
     })

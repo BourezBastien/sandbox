@@ -97,7 +97,7 @@ export function GameMenu({
         // Server Action errors reach the browser stripped of their message in
         // production, so there is nothing here worth showing verbatim — only
         // that the name was not saved, and that trying again is reasonable.
-        setError("That name could not be saved. Try again.")
+        setError("Ce nom n'a pas pu être enregistré. Réessaie.")
       }
     })
   }
@@ -116,7 +116,7 @@ export function GameMenu({
         // or the row this menu belongs to is about to stop being rendered.
         await deleteGame(gameId, pathname === `/games/${gameId}`)
       } catch {
-        setError("This game could not be deleted. Try again.")
+        setError("Ce jeu n'a pas pu être supprimé. Réessaie.")
       }
     })
   }
@@ -130,7 +130,7 @@ export function GameMenu({
             the sidebar puts one of these on every row and a screen reader
             would otherwise read out a column of identical buttons. */}
         <DropdownMenuTrigger
-          aria-label={`Options for ${title}`}
+          aria-label={`Options de ${title}`}
           render={trigger ?? <Button variant="ghost" size="icon-sm" />}
         >
           <EllipsisIcon />
@@ -140,14 +140,14 @@ export function GameMenu({
         <DropdownMenuContent align="end" className="w-40">
           <DropdownMenuItem onClick={() => openDialog("rename")}>
             <PencilLineIcon />
-            Rename
+            Renommer
           </DropdownMenuItem>
           <DropdownMenuItem
             variant="destructive"
             onClick={() => openDialog("delete")}
           >
             <Trash2Icon />
-            Move to trash
+            Mettre à la corbeille
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -159,14 +159,14 @@ export function GameMenu({
         <DialogContent>
           <form onSubmit={handleRename} className="grid gap-4">
             <DialogHeader>
-              <DialogTitle>Rename game</DialogTitle>
+              <DialogTitle>Renommer le jeu</DialogTitle>
               <DialogDescription>
-                This is the name in the sidebar and above the thread. It does
-                not change the game itself.
+                C&apos;est le nom affiché dans la barre latérale et au-dessus de la
+                discussion. Il ne modifie pas le jeu lui-même.
               </DialogDescription>
             </DialogHeader>
             <Field>
-              <FieldLabel htmlFor="game-title">Name</FieldLabel>
+              <FieldLabel htmlFor="game-title">Nom</FieldLabel>
               <Input
                 id="game-title"
                 name="title"
@@ -182,7 +182,7 @@ export function GameMenu({
             {error && <p className="text-sm text-destructive">{error}</p>}
             <DialogFooter>
               <DialogClose render={<Button variant="outline" />}>
-                Cancel
+                Annuler
               </DialogClose>
               {/* `type` because Base UI buttons default to `button`, and
                   `focusableWhenDisabled` so the press that disables this one
@@ -193,7 +193,7 @@ export function GameMenu({
                 focusableWhenDisabled
               >
                 {isPending && <Spinner />}
-                Save
+                Enregistrer
               </Button>
             </DialogFooter>
           </form>
@@ -206,15 +206,17 @@ export function GameMenu({
             <AlertDialogMedia>
               <Trash2Icon className="text-destructive" />
             </AlertDialogMedia>
-            <AlertDialogTitle>Move “{title}” to trash?</AlertDialogTitle>
+            <AlertDialogTitle>
+              Mettre « {title} » à la corbeille ?
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              The thread and the sandbox it was built in go with it. This cannot
-              be undone.
+              La discussion et le bac à sable dans lequel il a été construit
+              disparaissent avec lui. Cette action est irréversible.
             </AlertDialogDescription>
           </AlertDialogHeader>
           {error && <p className="text-sm text-destructive">{error}</p>}
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isPending}>Annuler</AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
               onClick={handleDelete}
@@ -222,7 +224,7 @@ export function GameMenu({
               focusableWhenDisabled
             >
               {isPending && <Spinner />}
-              Delete
+              Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -47,6 +47,8 @@ flowchart LR
 5. **Aperçu** — une route serveur démarre un serveur statique dans le bac à sable et signe une URL pour l'iframe.
 6. **Persistance** — chaque tour terminé enregistre les messages et le curseur de session ; un rechargement reprend un tour interrompu.
 
+> **Multijoueur** : en ligne, non — chaque jeu est un ensemble de fichiers statiques servis par un simple serveur HTTP, il n'y a rien par quoi deux navigateurs pourraient communiquer. En **local** (deux joueurs sur le même clavier, écran partagé, tour par tour), oui — les exemples « Course à deux » et « Duel de tanks » de la page d'accueil en sont la preuve.
+
 ## Rôles et sécurité
 
 - **Admin** — créé une fois pour toutes sur `/install` au premier déploiement. Gère les comptes (`/admin/users`), voit et ouvre tous les jeux (`/admin/games`), bloque en temps réel.

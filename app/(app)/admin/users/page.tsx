@@ -13,11 +13,11 @@ import {
 import { listUsersWithGameCounts } from "@/lib/admin/queries"
 
 export const metadata: Metadata = {
-  title: "Accounts",
+  title: "Comptes",
 }
 
-/** How a roster reads: "3 Oct 2026, 14:05". */
-const DATE_FORMAT = new Intl.DateTimeFormat("en-GB", {
+/** How a roster reads: "3 oct. 2026, 14:05". */
+const DATE_FORMAT = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",
   month: "short",
   year: "numeric",
@@ -31,28 +31,28 @@ export default async function AdminUsersPage() {
   return (
     <div className="flex min-h-svh flex-col">
       <header className="flex h-12 shrink-0 items-center justify-between gap-2 border-b px-4">
-        <span className="font-heading text-sm font-medium">Accounts</span>
+        <span className="font-heading text-sm font-medium">Comptes</span>
         <CreateUserButton />
       </header>
       <div className="mx-auto w-full max-w-5xl px-6 py-10">
         <h1 className="text-2xl font-semibold tracking-tight">
-          {users.length} {users.length === 1 ? "account" : "accounts"}
+          {users.length === 1 ? "1 compte" : `${users.length} comptes`}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Accounts sign in with the username and password set here. Blocking an
-          account disconnects it immediately.
+          Les comptes se connectent avec l&apos;identifiant et le mot de passe
+          définis ici. Bloquer un compte le déconnecte immédiatement.
         </p>
 
         <div className="mt-8 overflow-hidden rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Student</TableHead>
-                <TableHead>Username</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Games</TableHead>
-                <TableHead>Created</TableHead>
+                <TableHead>Élève</TableHead>
+                <TableHead>Identifiant</TableHead>
+                <TableHead>Rôle</TableHead>
+                <TableHead>Statut</TableHead>
+                <TableHead className="text-right">Jeux</TableHead>
+                <TableHead>Créé le</TableHead>
                 <TableHead className="w-10" />
               </TableRow>
             </TableHeader>
@@ -67,14 +67,14 @@ export default async function AdminUsersPage() {
                     {user.role === "admin" ? (
                       <Badge>Admin</Badge>
                     ) : (
-                      <span className="text-muted-foreground">Student</span>
+                      <span className="text-muted-foreground">Élève</span>
                     )}
                   </TableCell>
                   <TableCell>
                     {user.banned ? (
-                      <Badge variant="destructive">Blocked</Badge>
+                      <Badge variant="destructive">Bloqué</Badge>
                     ) : (
-                      <span className="text-muted-foreground">Active</span>
+                      <span className="text-muted-foreground">Actif</span>
                     )}
                   </TableCell>
                   <TableCell className="text-right tabular-nums">

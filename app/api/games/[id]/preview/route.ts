@@ -50,7 +50,7 @@ export async function GET(
       { "game.id": id, "http.response.status_code": 404 }
     )
 
-    return Response.json({ error: "Game not found" }, { status: 404 })
+    return Response.json({ error: "Jeu introuvable" }, { status: 404 })
   }
 
   // Null until the thread's first turn creates the sandbox, and for games made
@@ -65,7 +65,10 @@ export async function GET(
       { "game.id": id, "http.response.status_code": 409 }
     )
 
-    return Response.json({ error: "Game has no sandbox yet" }, { status: 409 })
+    return Response.json(
+      { error: "Ce jeu n'a pas encore de bac à sable" },
+      { status: 409 }
+    )
   }
 
   // A throw from here is a 500, which `onRequestError` in `@/instrumentation`

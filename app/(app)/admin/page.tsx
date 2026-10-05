@@ -22,16 +22,22 @@ export default async function AdminPage() {
         <span className="font-heading text-sm font-medium">Administration</span>
       </header>
       <div className="mx-auto w-full max-w-5xl px-6 py-10">
-        <h1 className="text-2xl font-semibold tracking-tight">Overview</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Vue d&apos;ensemble
+        </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Every account, game and sandbox on this deployment.
+          Tous les comptes, jeux et bacs à sable de ce déploiement.
         </p>
 
         <dl className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Stat label="Accounts" value={stats.users} href="/admin/users" />
-          <Stat label="Blocked" value={stats.banned} href="/admin/users" />
-          <Stat label="Games" value={stats.games} href="/admin/games" />
-          <Stat label="Sandboxes" value={stats.sandboxes} href="/admin/games" />
+          <Stat label="Comptes" value={stats.users} href="/admin/users" />
+          <Stat label="Bloqués" value={stats.banned} href="/admin/users" />
+          <Stat label="Jeux" value={stats.games} href="/admin/games" />
+          <Stat
+            label="Bacs à sable"
+            value={stats.sandboxes}
+            href="/admin/games"
+          />
         </dl>
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2">
@@ -41,10 +47,11 @@ export default async function AdminPage() {
           >
             <span className="flex items-center gap-2 font-medium">
               <UsersIcon className="size-4" />
-              Accounts
+              Comptes
             </span>
             <span className="text-sm text-muted-foreground">
-              Create student accounts, reset passwords, block in real time.
+              Créez les comptes élèves, réinitialisez les mots de passe, bloquez
+              en temps réel.
             </span>
           </Link>
           <Link
@@ -53,11 +60,11 @@ export default async function AdminPage() {
           >
             <span className="flex items-center gap-2 font-medium">
               <Gamepad2Icon className="size-4" />
-              Games
+              Jeux
             </span>
             <span className="text-sm text-muted-foreground">
-              Every game in the class, with its owner — open one to watch it
-              being built.
+              Tous les jeux de la classe avec leur propriétaire — ouvrez-en un
+              pour suivre sa construction en direct.
             </span>
           </Link>
         </div>

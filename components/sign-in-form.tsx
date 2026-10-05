@@ -37,7 +37,7 @@ export function SignInForm() {
 
       if (error) {
         setError(
-          "That username and password combination did not work. Check both and try again."
+          "Cet identifiant et ce mot de passe ne vont pas ensemble. Vérifie les deux et réessaie."
         )
         return
       }
@@ -50,14 +50,14 @@ export function SignInForm() {
   return (
     <div className="w-full max-w-sm">
       <div className="mb-6 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Bon retour !</h1>
         <p className="mt-1 text-sm text-balance text-muted-foreground">
-          Sign in with the account your teacher set up for you.
+          Connecte-toi avec le compte que ton professeur a créé pour toi.
         </p>
       </div>
       <form onSubmit={handleSubmit} className="grid gap-4">
         <Field>
-          <FieldLabel htmlFor="username">Username</FieldLabel>
+          <FieldLabel htmlFor="username">Identifiant</FieldLabel>
           <Input
             id="username"
             name="username"
@@ -72,7 +72,7 @@ export function SignInForm() {
           />
         </Field>
         <Field>
-          <FieldLabel htmlFor="password">Password</FieldLabel>
+          <FieldLabel htmlFor="password">Mot de passe</FieldLabel>
           <Input
             id="password"
             name="password"
@@ -96,7 +96,7 @@ export function SignInForm() {
           focusableWhenDisabled
         >
           {isPending && <Spinner />}
-          Sign in
+          Se connecter
         </Button>
       </form>
     </div>

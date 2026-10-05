@@ -20,7 +20,7 @@ export function ChatComposer({
   onModelChange,
   streaming = false,
   disabled = false,
-  placeholder = "Describe the game you want to build…",
+  placeholder = "Décris le jeu que tu veux créer…",
 }: {
   value: string
   onValueChange: (value: string) => void
@@ -80,7 +80,7 @@ export function ChatComposer({
             <Button
               size="icon-lg"
               onClick={onStop}
-              aria-label="Stop generating"
+              aria-label="Arrêter la génération"
               className="ml-auto rounded-full"
             >
               <SquareIcon className="fill-current" />
@@ -90,7 +90,7 @@ export function ChatComposer({
               type="submit"
               size="icon-lg"
               disabled={!canSubmit}
-              aria-label="Send message"
+              aria-label="Envoyer le message"
               className="ml-auto rounded-full"
             >
               <ArrowUpIcon />

@@ -13,10 +13,10 @@ import {
 import { listAllGamesWithOwners } from "@/lib/admin/queries"
 
 export const metadata: Metadata = {
-  title: "Games",
+  title: "Jeux",
 }
 
-const TIME_FORMAT = new Intl.DateTimeFormat("en-GB", {
+const TIME_FORMAT = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",
   month: "short",
   hour: "2-digit",
@@ -37,32 +37,33 @@ export default async function AdminGamesPage() {
   return (
     <div className="flex min-h-svh flex-col">
       <header className="flex h-12 shrink-0 items-center justify-between gap-2 border-b px-4">
-        <span className="font-heading text-sm font-medium">Games</span>
+        <span className="font-heading text-sm font-medium">Jeux</span>
         <Badge variant="secondary">{games.length}</Badge>
       </header>
       <div className="mx-auto w-full max-w-5xl px-6 py-10">
         <h1 className="text-2xl font-semibold tracking-tight">
-          {games.length === 1 ? "One game" : `${games.length} games`}
+          {games.length === 1 ? "Un jeu" : `${games.length} jeux`}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Sorted by latest activity. Open a game to watch its preview and thread
-          — including while a build is streaming.
+          Triés par activité récente. Ouvrez un jeu pour suivre son aperçu et sa
+          discussion — même pendant une construction.
         </p>
 
         {games.length === 0 ? (
           <p className="mt-10 rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
-            No games yet. They appear here the moment a student describes one.
+            Aucun jeu pour l&apos;instant. Ils apparaîtront ici dès qu&apos;un élève en
+            décrit un.
           </p>
         ) : (
           <div className="mt-8 overflow-hidden rounded-lg border">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Game</TableHead>
-                  <TableHead>Owner</TableHead>
-                  <TableHead>State</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Last activity</TableHead>
+                  <TableHead>Jeu</TableHead>
+                  <TableHead>Propriétaire</TableHead>
+                  <TableHead>État</TableHead>
+                  <TableHead>Créé le</TableHead>
+                  <TableHead>Dernière activité</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -87,9 +88,9 @@ export default async function AdminGamesPage() {
                     </TableCell>
                     <TableCell>
                       {game.hasSandbox ? (
-                        <span className="text-muted-foreground">Playable</span>
+                        <span className="text-muted-foreground">Jouable</span>
                       ) : (
-                        <Badge variant="secondary">Not built yet</Badge>
+                        <Badge variant="secondary">Pas encore construit</Badge>
                       )}
                     </TableCell>
                     <TableCell className="text-muted-foreground">

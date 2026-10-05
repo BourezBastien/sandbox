@@ -4,7 +4,7 @@ import Image from "next/image"
 import { SignInForm } from "@/components/sign-in-form"
 
 export const metadata: Metadata = {
-  title: "Sign in",
+  title: "Connexion",
 }
 
 export default function SignInPage() {

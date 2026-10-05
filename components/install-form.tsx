@@ -33,7 +33,7 @@ export function InstallForm() {
     setError(null)
 
     if (password !== confirm) {
-      setError("The two passwords do not match.")
+      setError("Les deux mots de passe ne correspondent pas.")
       return
     }
 
@@ -45,7 +45,7 @@ export function InstallForm() {
         setError(
           err instanceof Error
             ? err.message
-            : "The admin account could not be created. Try again."
+            : "Le compte administrateur n'a pas pu être créé. Réessayez."
         )
       }
     })
@@ -55,16 +55,18 @@ export function InstallForm() {
     <div className="w-full max-w-sm">
       <div className="mb-6 text-center">
         <h1 className="text-2xl font-semibold tracking-tight">
-          Set up your admin account
+          Créez votre compte administrateur
         </h1>
         <p className="mt-1 text-sm text-balance text-muted-foreground">
-          This one-time step creates the account that manages everything else.
-          It cannot be repeated.
+          Cette étape unique crée le compte qui gère tout le reste. Elle ne peut
+          pas être refaite.
         </p>
       </div>
       <form onSubmit={handleSubmit} className="grid gap-4">
         <Field>
-          <FieldLabel htmlFor="install-username">Admin username</FieldLabel>
+          <FieldLabel htmlFor="install-username">
+            Identifiant administrateur
+          </FieldLabel>
           <Input
             id="install-username"
             name="username"
@@ -80,7 +82,7 @@ export function InstallForm() {
           />
         </Field>
         <Field>
-          <FieldLabel htmlFor="install-name">Display name</FieldLabel>
+          <FieldLabel htmlFor="install-name">Nom affiché</FieldLabel>
           <Input
             id="install-name"
             name="name"
@@ -88,11 +90,11 @@ export function InstallForm() {
             value={name}
             onChange={(event) => setName(event.target.value)}
             disabled={isPending}
-            placeholder="Optional — defaults to the username"
+            placeholder="Facultatif — par défaut, l'identifiant"
           />
         </Field>
         <Field>
-          <FieldLabel htmlFor="install-password">Password</FieldLabel>
+          <FieldLabel htmlFor="install-password">Mot de passe</FieldLabel>
           <Input
             id="install-password"
             name="password"
@@ -106,7 +108,9 @@ export function InstallForm() {
           />
         </Field>
         <Field>
-          <FieldLabel htmlFor="install-confirm">Confirm password</FieldLabel>
+          <FieldLabel htmlFor="install-confirm">
+            Confirmer le mot de passe
+          </FieldLabel>
           <Input
             id="install-confirm"
             name="confirm"
@@ -131,7 +135,7 @@ export function InstallForm() {
           focusableWhenDisabled
         >
           {isPending && <Spinner />}
-          Create admin account
+          Créer le compte administrateur
         </Button>
       </form>
     </div>

@@ -45,7 +45,7 @@ function readError(data: unknown): GameError | null {
   const error = status.error as Record<string, unknown>
 
   return {
-    message: text(error.message) || "Unknown error",
+    message: text(error.message) || "Erreur inconnue",
     source: text(error.source),
     line: count(error.line),
     column: count(error.column),
@@ -101,7 +101,7 @@ export function ChatPreview({
         const body = await response.json()
 
         if (!response.ok) {
-          throw new Error(body.error ?? "Preview is unavailable")
+          throw new Error(body.error ?? "L'aperçu est indisponible")
         }
 
         setPreview({ status: "ready", url: body.url, revision })
@@ -112,7 +112,7 @@ export function ChatPreview({
         }
 
         const message =
-          error instanceof Error ? error.message : "Preview is unavailable"
+          error instanceof Error ? error.message : "L'aperçu est indisponible"
 
         // The player is about to see "Preview is unavailable" and nothing else
         // — this is the only record of which of the several reasons it was.
@@ -219,7 +219,7 @@ export function ChatPreview({
     return (
       <div className="flex h-full items-center justify-center gap-2 text-sm text-muted-foreground">
         <Spinner />
-        Starting preview…
+        Démarrage de l&apos;aperçu…
       </div>
     )
   }
@@ -242,7 +242,7 @@ export function ChatPreview({
       // one, which loads whatever the sandbox now serves.
       key={preview.revision}
       src={preview.url}
-      title="Game preview"
+      title="Aperçu du jeu"
       className="h-full w-full border-0 bg-white"
     />
   )

@@ -346,7 +346,7 @@ export function ChatThread({
         {error ? (
           <Alert>
             <CircleAlertIcon />
-            <AlertTitle>That turn didn&apos;t finish</AlertTitle>
+            <AlertTitle>Ce tour ne s&apos;est pas terminé</AlertTitle>
             <AlertDescription>{error.message}</AlertDescription>
           </Alert>
         ) : null}
@@ -360,7 +360,9 @@ export function ChatThread({
           streaming={status === "submitted" || status === "streaming"}
           disabled={status !== "ready" || pendingQuestion}
           placeholder={
-            pendingQuestion ? "Pick an answer above…" : "Ask for a change…"
+            pendingQuestion
+              ? "Choisis une réponse ci-dessus…"
+              : "Demande une modification…"
           }
         />
       </div>
@@ -423,7 +425,7 @@ function ToolCallMarker({ part }: { part: ToolUIPart | DynamicToolUIPart }) {
       <MarkerContent>
         {status === "active" ? verbs.active : verbs.done}
         {target && <span className="ml-1 text-foreground">{target}</span>}
-        {status === "failed" && " — failed"}
+        {status === "failed" && " — échec"}
       </MarkerContent>
     </Marker>
   )
@@ -452,17 +454,17 @@ function toolCallStatus(
 }
 
 // Present tense while the call is in flight, past tense once it has landed —
-// a finished call reads wrong as a frozen "Reading".
+// a finished call reads wrong as a frozen "Lecture".
 const TOOL_VERBS: Record<string, { active: string; done: string }> = {
-  read_file: { active: "Reading", done: "Read" },
-  write_file: { active: "Writing", done: "Wrote" },
-  replace_text: { active: "Editing", done: "Edited" },
-  list_files: { active: "Listing files", done: "Listed files" },
-  delete_file: { active: "Deleting", done: "Deleted" },
-  [ASK_PLAYER]: { active: "Asking", done: "Asked" },
+  read_file: { active: "Lecture de", done: "Lu" },
+  write_file: { active: "Écriture de", done: "Écrit" },
+  replace_text: { active: "Modification de", done: "Modifié" },
+  list_files: { active: "Listage des fichiers", done: "Fichiers listés" },
+  delete_file: { active: "Suppression de", done: "Supprimé" },
+  [ASK_PLAYER]: { active: "Question en cours", done: "Question posée" },
 }
 
-const FALLBACK_VERBS = { active: "Working", done: "Ran tool" }
+const FALLBACK_VERBS = { active: "En cours", done: "Outil exécuté" }
 
 /**
  * The file a call is about, when it names one.
@@ -498,13 +500,13 @@ const ASK_ITEM = "answer"
  * game they are all answers about.
  */
 const ASK_DIMENSIONS: Record<string, string> = {
-  loop: "the core loop",
-  goal: "the goal",
-  challenge: "the challenge",
-  controls: "the controls",
-  world: "the world",
-  look: "the look",
-  feel: "the feel",
+  loop: "la boucle de jeu",
+  goal: "l'objectif",
+  challenge: "la difficulté",
+  controls: "les commandes",
+  world: "le monde",
+  look: "le style",
+  feel: "l'ambiance",
 }
 
 type AskPlayerOption = { id: string; label: string; description?: string }
@@ -551,7 +553,7 @@ function AskPlayerCard({
           <CircleQuestionMarkIcon />
         </MarkerIcon>
         <MarkerContent>
-          {dimension ? `A question about ${dimension}` : "A question"}
+          {dimension ? `Une question sur ${dimension}` : "Une question"}
         </MarkerContent>
       </Marker>
 
@@ -588,7 +590,7 @@ function AskPlayerCard({
             <QuestionnaireError />
           </QuestionnaireItem>
           <QuestionnaireActions>
-            <QuestionnaireSubmit size="sm">Build this</QuestionnaireSubmit>
+            <QuestionnaireSubmit size="sm">Construire ça</QuestionnaireSubmit>
           </QuestionnaireActions>
         </Questionnaire>
       ) : (
@@ -606,7 +608,7 @@ function AskPlayerCard({
               {answered ? (
                 <span className="text-foreground">{answered}</span>
               ) : (
-                "Left unanswered"
+                "Restée sans réponse"
               )}
             </MarkerContent>
           </Marker>

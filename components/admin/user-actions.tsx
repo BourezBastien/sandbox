@@ -57,7 +57,7 @@ import { Spinner } from "@/components/ui/spinner"
  * stripped of their message in production, so the thrown message is only ever
  * a bonus in dev — the copy assumes the worst case and says what to do next.
  */
-const GENERIC_ERROR = "That did not work. Try again."
+const GENERIC_ERROR = "Cela n'a pas fonctionné. Réessayez."
 
 /** The create-account dialog, opened from the accounts page header. */
 export function CreateUserButton() {
@@ -101,20 +101,20 @@ export function CreateUserButton() {
     <>
       <Button size="sm" onClick={() => handleOpenChange(true)}>
         <PlusIcon />
-        New account
+        Nouveau compte
       </Button>
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent>
           <form onSubmit={handleSubmit} className="grid gap-4">
             <DialogHeader>
-              <DialogTitle>New student account</DialogTitle>
+              <DialogTitle>Nouveau compte élève</DialogTitle>
               <DialogDescription>
-                The student signs in with this username and password. They can
-                be changed later from the same table.
+                L&apos;élève se connecte avec cet identifiant et ce mot de passe. Ils
+                peuvent être modifiés plus tard depuis ce même tableau.
               </DialogDescription>
             </DialogHeader>
             <Field>
-              <FieldLabel htmlFor="create-username">Username</FieldLabel>
+              <FieldLabel htmlFor="create-username">Identifiant</FieldLabel>
               <Input
                 id="create-username"
                 name="username"
@@ -127,16 +127,16 @@ export function CreateUserButton() {
               />
             </Field>
             <Field>
-              <FieldLabel htmlFor="create-name">Student name</FieldLabel>
+              <FieldLabel htmlFor="create-name">Nom de l&apos;élève</FieldLabel>
               <Input
                 id="create-name"
                 name="name"
                 disabled={isPending}
-                placeholder="Optional — defaults to the username"
+                placeholder="Facultatif — par défaut, l'identifiant"
               />
             </Field>
             <Field>
-              <FieldLabel htmlFor="create-password">Password</FieldLabel>
+              <FieldLabel htmlFor="create-password">Mot de passe</FieldLabel>
               <Input
                 id="create-password"
                 name="password"
@@ -149,11 +149,11 @@ export function CreateUserButton() {
             {error && <p className="text-sm text-destructive">{error}</p>}
             <DialogFooter>
               <DialogClose render={<Button variant="outline" />}>
-                Cancel
+                Annuler
               </DialogClose>
               <Button type="submit" disabled={isPending} focusableWhenDisabled>
                 {isPending && <Spinner />}
-                Create
+                Créer
               </Button>
             </DialogFooter>
           </form>
@@ -218,7 +218,7 @@ export function UserActions({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger
-          aria-label={`Actions for ${name}`}
+          aria-label={`Actions de ${name}`}
           render={<Button variant="ghost" size="icon-sm" />}
         >
           <EllipsisIcon />
@@ -226,26 +226,26 @@ export function UserActions({
         <DropdownMenuContent align="end" className="w-48">
           <DropdownMenuItem onClick={() => openDialog("password")}>
             <KeyRoundIcon />
-            Reset password
+            Réinitialiser le mot de passe
           </DropdownMenuItem>
           {/* A confirmation would only slow down the mid-class "put that
               away" — and unlike a block, everything works again on the next
               sign-in. */}
           <DropdownMenuItem onClick={() => run(() => forceSignOut({ userId }))}>
             <LogOutIcon />
-            Sign out everywhere
+            Déconnecter partout
           </DropdownMenuItem>
           {banned ? (
             <DropdownMenuItem
               onClick={() => run(() => unbanUserAccount({ userId }))}
             >
               <ShieldCheckIcon />
-              Unblock
+              Débloquer
             </DropdownMenuItem>
           ) : (
             <DropdownMenuItem onClick={() => openDialog("block")}>
               <BanIcon />
-              Block
+              Bloquer
             </DropdownMenuItem>
           )}
           {!isAdmin && (
@@ -256,7 +256,7 @@ export function UserActions({
                 onClick={() => openDialog("delete")}
               >
                 <Trash2Icon />
-                Delete
+                Supprimer
               </DropdownMenuItem>
             </>
           )}
@@ -277,14 +277,16 @@ export function UserActions({
             className="grid gap-4"
           >
             <DialogHeader>
-              <DialogTitle>Reset password for {name}</DialogTitle>
+              <DialogTitle>Réinitialiser le mot de passe de {name}</DialogTitle>
               <DialogDescription>
-                Every tab this student is signed in on is signed out with the
-                change.
+                Tous les onglets où cet élève est connecté seront déconnectés
+                par la même occasion.
               </DialogDescription>
             </DialogHeader>
             <Field>
-              <FieldLabel htmlFor="reset-password">New password</FieldLabel>
+              <FieldLabel htmlFor="reset-password">
+                Nouveau mot de passe
+              </FieldLabel>
               <Input
                 id="reset-password"
                 name="password"
@@ -298,11 +300,11 @@ export function UserActions({
             {error && <p className="text-sm text-destructive">{error}</p>}
             <DialogFooter>
               <DialogClose render={<Button variant="outline" />}>
-                Cancel
+                Annuler
               </DialogClose>
               <Button type="submit" disabled={isPending} focusableWhenDisabled>
                 {isPending && <Spinner />}
-                Set password
+                Définir le mot de passe
               </Button>
             </DialogFooter>
           </form>
@@ -316,16 +318,16 @@ export function UserActions({
             <AlertDialogMedia>
               <BanIcon className="text-destructive" />
             </AlertDialogMedia>
-            <AlertDialogTitle>Block {name}?</AlertDialogTitle>
+            <AlertDialogTitle>Bloquer {name} ?</AlertDialogTitle>
             <AlertDialogDescription>
-              They are signed out immediately, and any build running right now
-              is stopped. Unblocking lets them sign back in with everything
-              still in place.
+              Il est déconnecté immédiatement et toute construction en cours est
+              arrêtée. Le déblocage lui permet de se reconnecter, tout restant
+              en place.
             </AlertDialogDescription>
           </AlertDialogHeader>
           {error && <p className="text-sm text-destructive">{error}</p>}
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isPending}>Annuler</AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
               onClick={() => run(() => banUserAccount({ userId }))}
@@ -333,7 +335,7 @@ export function UserActions({
               focusableWhenDisabled
             >
               {isPending && <Spinner />}
-              Block
+              Bloquer
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -346,15 +348,16 @@ export function UserActions({
             <AlertDialogMedia>
               <Trash2Icon className="text-destructive" />
             </AlertDialogMedia>
-            <AlertDialogTitle>Delete {name}?</AlertDialogTitle>
+            <AlertDialogTitle>Supprimer {name} ?</AlertDialogTitle>
             <AlertDialogDescription>
-              Their games, their threads, and the sandboxes those games were
-              built in all go with the account. This cannot be undone.
+              Ses jeux, ses discussions et les bacs à sable dans lesquels ils
+              ont été construits disparaissent avec le compte. Cette action est
+              irréversible.
             </AlertDialogDescription>
           </AlertDialogHeader>
           {error && <AlertError>{error}</AlertError>}
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isPending}>Annuler</AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
               onClick={() => run(() => removeUserAccount({ userId }))}
@@ -362,7 +365,7 @@ export function UserActions({
               focusableWhenDisabled
             >
               {isPending && <Spinner />}
-              Delete
+              Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

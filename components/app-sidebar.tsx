@@ -77,18 +77,18 @@ export function AppSidebar({
                 render={<Link href="/" />}
               >
                 <SquarePenIcon />
-                <span>New game</span>
+                <span>Nouveau jeu</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
         <SidebarGroup>
-          <SidebarGroupLabel>Recents</SidebarGroupLabel>
+          <SidebarGroupLabel>Récents</SidebarGroupLabel>
           <SidebarGroupContent>
             {games.length === 0 ? (
               <Empty className="border p-2 group-data-[collapsible=icon]:hidden">
                 <EmptyDescription className="text-xs">
-                  Your games will live here.
+                  Tes jeux apparaîtront ici.
                 </EmptyDescription>
               </Empty>
             ) : (
@@ -124,7 +124,7 @@ export function AppSidebar({
                     render={
                       <SidebarMenuButton>
                         <MessageSquareIcon />
-                        <span>Recents</span>
+                        <span>Récents</span>
                       </SidebarMenuButton>
                     }
                   />
@@ -135,13 +135,13 @@ export function AppSidebar({
                   >
                     <PopoverHeader className="px-2 pt-1">
                       <PopoverTitle className="text-xs text-muted-foreground">
-                        Recents
+                        Récents
                       </PopoverTitle>
                     </PopoverHeader>
                     {games.length === 0 ? (
                       <Empty className="border p-2">
                         <EmptyDescription className="text-xs">
-                          Your games will live here.
+                          Tes jeux apparaîtront ici.
                         </EmptyDescription>
                       </Empty>
                     ) : (
@@ -233,7 +233,7 @@ function UserMenu({ name, username }: { name: string; username?: string }) {
         type="button"
         onClick={handleSignOut}
         disabled={isPending}
-        aria-label="Sign out"
+        aria-label="Se déconnecter"
         className="flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors group-data-[collapsible=icon]:hidden hover:bg-sidebar-accent hover:text-sidebar-accent-foreground disabled:opacity-50"
       >
         {isPending ? <Spinner /> : <LogOutIcon className="size-4" />}
