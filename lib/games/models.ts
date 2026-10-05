@@ -126,6 +126,7 @@ const zai = createAnthropic({
 })
 
 export const gameModels = {
+  "glm-4.7-flash": zai("glm-4.7-flash"),
   "glm-5.3-flash": zai("glm-5.3-flash"),
   "glm-5.3": zai("glm-5.3"),
 } satisfies Record<GameModelId, LanguageModel>
