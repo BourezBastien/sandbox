@@ -23,11 +23,6 @@ export const GAME_MODELS = [
     tagline:
       "Le plus doué, inclus dans l'abonnement. Réfléchit avant chaque réponse.",
   },
-  {
-    id: "glm-4.7-flash",
-    name: "GLM 4.7 Flash",
-    tagline: "Le gratuit, pour une clé API à l'usage sans abonnement.",
-  },
 ] as const
 
 /**

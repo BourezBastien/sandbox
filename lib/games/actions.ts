@@ -22,9 +22,9 @@ import {
 import { truncateTitle } from "@/lib/games/title"
 import { describeError, elapsed } from "@/lib/observability"
 
-// The free tier of the catalog - naming a game is one short call, and paying
-// tokens for it would be the only unavoidable cost in an otherwise free flow.
-const TITLE_MODEL = "glm-4.7-flash"
+// The fast half of the catalog - naming a game is one short call, and it
+// draws on the Coding Plan credits rather than the heavier model.
+const TITLE_MODEL = "glm-5.3-flash"
 
 /**
  * Names a game after the prompt it was created from.
