@@ -22,6 +22,53 @@ import type { GameModelId } from "./model-catalog"
  * `GameModelId` - a model added to the catalog and forgotten here is a type
  * error, not an undefined model discovered at the top of someone's turn.
  */
+/**
+ * Z_AI_DEBUG=true pipes the raw z.ai request and response into the run log
+ * (console, visible on cloud.trigger.dev). The SSE stream is teed, so the
+ * model call itself is untouched - only its wire traffic becomes readable.
+ *
+ * Made for exactly this class of failure: a stream that closes without a
+ * finish chunk says nothing about why, and the raw events are the only place
+ * the reason is written down. Leave it off otherwise: it logs prompt text.
+ */
+async function debugFetch(
+  input: Parameters<typeof fetch>[0],
+  init?: Parameters<typeof fetch>[1]
+): Promise<Response> {
+  if (typeof init?.body === "string") {
+    console.log("[zai] >>>", init.body.slice(0, 4000))
+  }
+
+  const response = await fetch(input, init)
+
+  console.log("[zai] <<<", response.status)
+
+  if (!response.body) {
+    return response
+  }
+
+  const [forSdk, forLog] = response.body.tee()
+  let logged = 0
+  void forLog.pipeTo(
+    new WritableStream<Uint8Array>({
+      write(chunk) {
+        if (logged >= 8000) {
+          return
+        }
+        const text = new TextDecoder().decode(chunk).slice(0, 8000 - logged)
+        logged += text.length
+        console.log("[zai]", text)
+      },
+    })
+  )
+
+  return new Response(forSdk, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+  })
+}
+
 const zai = createAnthropic({
   baseURL: process.env.Z_AI_BASE_URL ?? "https://api.z.ai/api/anthropic",
   apiKey: process.env.Z_AI_API_KEY,
@@ -34,6 +81,7 @@ const zai = createAnthropic({
   headers: process.env.Z_AI_API_KEY
     ? { Authorization: `Bearer ${process.env.Z_AI_API_KEY}` }
     : undefined,
+  fetch: process.env.Z_AI_DEBUG === "true" ? debugFetch : undefined,
 })
 
 export const gameModels = {
