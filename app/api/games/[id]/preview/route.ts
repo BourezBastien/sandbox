@@ -19,8 +19,8 @@ import { elapsed } from "@/lib/observability"
  * because it is loaded in an iframe, which cannot send the
  * `x-daytona-preview-token` header the standard link requires.
  *
- * `getGame` resolves the organization from the session and scopes the lookup to
- * it, so a game belonging to another org — or a caller with no session at all —
+ * `getGame` resolves the caller from the session and scopes the lookup to it,
+ * so a game belonging to someone else — or a caller with no session at all —
  * is indistinguishable from a game that doesn't exist.
  */
 export async function GET(

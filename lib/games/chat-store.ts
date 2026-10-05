@@ -9,10 +9,10 @@ import { db, games } from "@/lib/db/client"
 /**
  * A game's stored chat thread.
  *
- * Lookups here are by id alone, with no org scoping, unlike `getGame`. The
- * caller is the chat agent, which has no Clerk session to scope by — a game id
+ * Lookups here are by id alone, with no user scoping, unlike `getGame`. The
+ * caller is the chat agent, which has no user session to scope by — a game id
  * only ever reaches it through a session the server actions in
- * `@/lib/games/chat-actions` already authorized against the caller's org.
+ * `@/lib/games/chat-actions` already authorized against the caller.
  */
 export async function loadGameMessages(gameId: string): Promise<UIMessage[]> {
   const [game] = await db
@@ -22,25 +22,6 @@ export async function loadGameMessages(gameId: string): Promise<UIMessage[]> {
     .limit(1)
 
   return game?.messages ?? []
-}
-
-/**
- * The organization a game belongs to, or `undefined` if the game is gone.
- *
- * The agent bills the org that owns the game rather than one it is told about:
- * the model id on a turn comes from the browser, but who pays for it is settled
- * here, from the row, where a tab cannot reach it.
- */
-export async function loadGameOrgId(
-  gameId: string
-): Promise<string | undefined> {
-  const [game] = await db
-    .select({ orgId: games.orgId })
-    .from(games)
-    .where(eq(games.id, gameId))
-    .limit(1)
-
-  return game?.orgId
 }
 
 /**

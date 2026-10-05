@@ -1,20 +1,21 @@
-import { auth } from "@clerk/nextjs/server"
-
 import { AppSidebar } from "@/components/app-sidebar"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
-import { getCreditBalance } from "@/lib/billing/ledger"
+import { requireSession } from "@/lib/auth"
 import { listGames } from "@/lib/games/queries"
 
 export default async function AppLayout({ children }: LayoutProps<"/">) {
-  const { orgId } = await auth()
-  const [games, credits] = await Promise.all([
-    listGames(),
-    getCreditBalance(orgId),
-  ])
+  // The one guard for every page in this group: the sidebar below needs the
+  // signed-in user anyway, and a caller without a session has nothing to see
+  // here. Banned callers never get this far — banning revokes every session.
+  const { user } = await requireSession()
+  const games = await listGames()
 
   return (
     <SidebarProvider>
-      <AppSidebar games={games} credits={credits} />
+      <AppSidebar
+        games={games}
+        user={{ name: user.name, username: user.username, role: user.role }}
+      />
       <SidebarInset>{children}</SidebarInset>
     </SidebarProvider>
   )

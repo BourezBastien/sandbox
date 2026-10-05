@@ -1,0 +1,14 @@
+node_modules
+.next
+.git
+.github
+.zcode
+.agents
+.claude
+.env*
+!.env.example
+reference
+design
+*.md
+!README.md
+.trigger

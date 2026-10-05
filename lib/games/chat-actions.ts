@@ -4,7 +4,6 @@ import * as Sentry from "@sentry/nextjs"
 import { auth as triggerAuth } from "@trigger.dev/sdk"
 import { chat, type ChatStartSessionParams } from "@trigger.dev/sdk/ai"
 
-import { hasCreditsToBuild, OUT_OF_CREDITS } from "@/lib/billing/ledger"
 import { authorizeGame } from "@/lib/games/authorize"
 import { describeError, elapsed } from "@/lib/observability"
 import type { gameChat } from "@/trigger/chat"
@@ -21,22 +20,7 @@ export async function startGameChatSession(
 ) {
   const startedAt = performance.now()
 
-  const { orgId } = await authorizeGame(params.chatId, "startGameChatSession")
-
-  // Checked before the session exists rather than inside it: a session that
-  // cannot afford a turn should never be created, because creating one starts a
-  // run that sits there waiting for a message it will only refuse. The agent
-  // checks again on every turn after this — a thread outlives the balance that
-  // opened it.
-  if (!(await hasCreditsToBuild(orgId))) {
-    Sentry.logger.info(
-      Sentry.logger
-        .fmt`Refused a chat session for game ${params.chatId} — no credits`,
-      { "game.id": params.chatId, "organization.id": orgId }
-    )
-
-    throw new Error(OUT_OF_CREDITS)
-  }
+  await authorizeGame(params.chatId, "startGameChatSession")
 
   try {
     const session = await startSession(params)

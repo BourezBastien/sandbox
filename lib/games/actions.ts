@@ -1,17 +1,17 @@
 "use server"
 
-import { anthropic } from "@ai-sdk/anthropic"
-import { auth } from "@clerk/nextjs/server"
 import * as Sentry from "@sentry/nextjs"
 import { generateText } from "ai"
-import { and, eq } from "drizzle-orm"
+import { eq } from "drizzle-orm"
 import { refresh } from "next/cache"
 import { redirect } from "next/navigation"
 
 import { deleteGameSandboxes } from "@/lib/daytona/utils"
 import { db, games } from "@/lib/db"
+import { getSession } from "@/lib/auth"
 import { authorizeGame } from "@/lib/games/authorize"
 import { endGameChatSession } from "@/lib/games/chat-session"
+import { gameModels } from "@/lib/games/models"
 import { generateMessageId } from "@/lib/games/messages"
 import {
   DEFAULT_GAME_MODEL_ID,
@@ -21,7 +21,9 @@ import {
 import { truncateTitle } from "@/lib/games/title"
 import { describeError, elapsed } from "@/lib/observability"
 
-const TITLE_MODEL = "claude-haiku-4-5"
+// The free tier of the catalog — naming a game is one short call, and paying
+// tokens for it would be the only unavoidable cost in an otherwise free flow.
+const TITLE_MODEL = "glm-4.7-flash"
 
 /**
  * Names a game after the prompt it was created from.
@@ -36,7 +38,7 @@ async function generateTitle(prompt: string) {
 
   try {
     const { text } = await generateText({
-      model: anthropic(TITLE_MODEL),
+      model: gameModels[TITLE_MODEL],
       instructions:
         "You name games from the prompt that created them. Reply with a title " +
         "of at most four words in title case. No quotes, no punctuation at the " +
@@ -76,32 +78,34 @@ async function generateTitle(prompt: string) {
 }
 
 /**
- * Creates a game from the composer prompt, scopes it to the caller's active
- * organization, and navigates to it.
+ * Creates a game from the composer prompt, scopes it to the caller, and
+ * navigates to it.
  *
  * The prompt is stored as the thread's opening message so it survives the
  * navigation without riding along in the URL; `ChatThread` asks for the reply
  * once the game page mounts. The model picked alongside it does ride in the
  * URL — see the redirect below.
  *
- * Server Actions are reachable by direct POST, so the org is resolved from the
- * session here rather than trusted from the caller.
+ * Server Actions are reachable by direct POST, so the user is resolved from
+ * the session here rather than trusted from the caller.
  */
 export async function createGame(prompt: string, modelId: GameModelId) {
   const startedAt = performance.now()
-  const { userId, orgId } = await auth()
+  const session = await getSession()
 
-  if (!orgId) {
+  if (!session) {
     // Reachable by direct POST, per the note above, so this is as much a
-    // security signal as a bug report: a caller with no active org asking for
-    // a game is either a broken client or someone probing the action.
-    Sentry.logger.warn("Rejected createGame with no active organization", {
-      "user.id": userId ?? "anonymous",
+    // security signal as a bug report: a caller with no session asking for a
+    // game is either a broken client or someone probing the action.
+    Sentry.logger.warn("Rejected createGame with no session", {
+      "user.id": "anonymous",
       "app.action": "createGame",
     })
 
-    throw new Error("An active organization is required to create a game.")
+    throw new Error("Sign-in is required to create a game.")
   }
+
+  const userId = session.user.id
 
   // Tags, not scope attributes: attributes reach spans and events but not logs,
   // and these are here for the *events* — so that a throw further down (the
@@ -112,8 +116,7 @@ export async function createGame(prompt: string, modelId: GameModelId) {
   // so these can't bleed into another user's concurrent request.
   Sentry.getIsolationScope().setTags({
     "app.action": "createGame",
-    "user.id": userId ?? "unknown",
-    "organization.id": orgId,
+    "user.id": userId,
   })
 
   const trimmedPrompt = typeof prompt === "string" ? prompt.trim() : ""
@@ -122,14 +125,14 @@ export async function createGame(prompt: string, modelId: GameModelId) {
     return
   }
 
-  // Checked rather than trusted, for the same reason the org is: this action is
+  // Checked rather than trusted, for the same reason the user is: this action is
   // reachable by direct POST, and the value goes straight into the URL below.
   const model = isGameModelId(modelId) ? modelId : DEFAULT_GAME_MODEL_ID
 
   const [game] = await db
     .insert(games)
     .values({
-      orgId,
+      userId,
       title: truncateTitle(await generateTitle(trimmedPrompt)),
       messages: [
         {
@@ -149,8 +152,7 @@ export async function createGame(prompt: string, modelId: GameModelId) {
   Sentry.logger.info(Sentry.logger.fmt`Created game ${game.id}`, {
     "app.action": "createGame",
     "game.id": game.id,
-    "user.id": userId ?? "unknown",
-    "organization.id": orgId,
+    "user.id": userId,
     "prompt.length": trimmedPrompt.length,
     // Which model the game is about to be built with — the one question about
     // a create that only a picker makes it possible to ask.
@@ -190,7 +192,7 @@ export async function createGame(prompt: string, modelId: GameModelId) {
  * and neither wants a failure it can act on.
  */
 export async function renameGame(gameId: string, title: string) {
-  const { game, orgId } = await authorizeGame(gameId, "renameGame")
+  const { game } = await authorizeGame(gameId, "renameGame")
 
   const trimmed = typeof title === "string" ? truncateTitle(title.trim()) : ""
 
@@ -198,13 +200,9 @@ export async function renameGame(gameId: string, title: string) {
     return
   }
 
-  // Scoped to the org as well as the id, even though `authorizeGame` has
-  // already proved ownership: it costs an indexed comparison and makes the
-  // statement safe to read on its own.
-  await db
-    .update(games)
-    .set({ title: trimmed })
-    .where(and(eq(games.id, gameId), eq(games.orgId, orgId)))
+  // By id alone: `authorizeGame` has already proved the caller owns this game
+  // (or is the admin), and the admin's id is not the row's owner.
+  await db.update(games).set({ title: trimmed }).where(eq(games.id, gameId))
 
   // The title itself is not logged, for the same reason prompts are not:
   // it is the player's words. The length is what a log would want anyway —
@@ -212,7 +210,6 @@ export async function renameGame(gameId: string, title: string) {
   Sentry.logger.info(Sentry.logger.fmt`Renamed game ${gameId}`, {
     "app.action": "renameGame",
     "game.id": gameId,
-    "organization.id": orgId,
     "title.length": trimmed.length,
   })
 
@@ -249,15 +246,15 @@ export async function renameGame(gameId: string, title: string) {
  */
 export async function deleteGame(gameId: string, returnHome: boolean) {
   const startedAt = performance.now()
-  const { game, userId, orgId } = await authorizeGame(gameId, "deleteGame")
+  const { game, userId } = await authorizeGame(gameId, "deleteGame")
 
   await endGameChatSession(gameId)
 
   const sandboxes = await deleteGameSandboxes(gameId, game.sandboxId)
 
-  await db
-    .delete(games)
-    .where(and(eq(games.id, gameId), eq(games.orgId, orgId)))
+  // By id alone: `authorizeGame` has already proved the caller owns this game
+  // (or is the admin), and the admin's id is not the row's owner.
+  await db.delete(games).where(eq(games.id, gameId))
 
   try {
     await deleteGameSandboxes(gameId)
@@ -271,7 +268,6 @@ export async function deleteGame(gameId: string, returnHome: boolean) {
       {
         "app.action": "deleteGame",
         "game.id": gameId,
-        "organization.id": orgId,
         ...describeError(error),
       }
     )
@@ -284,7 +280,6 @@ export async function deleteGame(gameId: string, returnHome: boolean) {
     "app.action": "deleteGame",
     "game.id": gameId,
     "user.id": userId,
-    "organization.id": orgId,
     "sandbox.deleted": sandboxes,
     duration_ms: elapsed(startedAt),
   })

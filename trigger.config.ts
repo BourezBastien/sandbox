@@ -58,7 +58,10 @@ const daytonaExternal: BuildExtension = {
 };
 
 export default defineConfig({
-  project: "proj_mrgzxrrrlsqxhkxnkflz",
+  // From the environment rather than hard-coded: the deploy runs from CI
+  // (GitHub Actions — see .github/workflows/deploy-trigger.yml) and from
+  // developer machines, each with their own Trigger.dev project.
+  project: process.env.TRIGGER_PROJECT_REF ?? "",
   runtime: "node-24",
   logLevel: "log",
   // The max compute seconds a task is allowed to run. If the task run exceeds this duration, it will be stopped.

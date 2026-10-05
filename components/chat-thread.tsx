@@ -21,7 +21,6 @@ import {
   CircleQuestionMarkIcon,
 } from "lucide-react"
 import Image from "next/image"
-import Link from "next/link"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { ChatComposer } from "@/components/chat-composer"
@@ -64,14 +63,12 @@ const ASK_PLAYER = "ask_player"
 
 export function ChatThread({
   gameId,
-  credits,
   initialMessages,
   initialModelId,
   initialSession,
   onTurnComplete,
 }: {
   gameId: string
-  credits: bigint
   initialMessages: UIMessage[]
   initialModelId: GameModelId
   initialSession?: ChatSessionPersistedState
@@ -197,12 +194,6 @@ export function ChatThread({
     },
   })
 
-  // The balance as of the last server render, so this closes the composer
-  // before a turn is attempted rather than after one is refused. It cannot
-  // notice a balance emptied by the turn now streaming — `onTurnComplete`
-  // refreshes the page, and the agent refuses the next turn regardless.
-  const outOfCredits = credits <= 0n
-
   // Synced in an effect rather than assigned during render, which is a ref
   // write React's rules — rightly — refuse.
   useEffect(() => {
@@ -222,13 +213,10 @@ export function ChatThread({
 
     submittedGameId.current = gameId
 
-    // A new game arrives with its opening prompt already stored, so without
-    // this guard an org with no credits would open every game it created
-    // straight into a refused turn.
-    if (!outOfCredits && initialMessages.at(-1)?.role === "user") {
+    if (initialMessages.at(-1)?.role === "user") {
       sendMessage()
     }
-  }, [gameId, initialMessages, sendMessage, outOfCredits])
+  }, [gameId, initialMessages, sendMessage])
 
   function handleSubmit(value: string) {
     sendMessage({ text: value })
@@ -355,27 +343,7 @@ export function ChatThread({
         </MessageScroller>
       </MessageScrollerProvider>
       <div className="mx-auto flex w-full max-w-3xl shrink-0 flex-col gap-3 px-4 pb-4">
-        {/* Two ways to arrive here, and the balance is checked first because it
-            is the one that knows *why*: a turn refused before it started for
-            want of credits comes back as an ordinary error, and a Server Action
-            does not promise to deliver its message intact. Anything else that
-            went wrong says so in its own words. */}
-        {outOfCredits ? (
-          <Alert>
-            <CircleAlertIcon />
-            <AlertTitle>Out of credits</AlertTitle>
-            <AlertDescription>
-              <p>
-                Building a game spends credits, and this organization has none
-                left.{" "}
-                <Link href="/billing" className="underline underline-offset-4">
-                  Add more from the billing page
-                </Link>{" "}
-                to pick this game back up.
-              </p>
-            </AlertDescription>
-          </Alert>
-        ) : error ? (
+        {error ? (
           <Alert>
             <CircleAlertIcon />
             <AlertTitle>That turn didn&apos;t finish</AlertTitle>
@@ -390,13 +358,9 @@ export function ChatThread({
           modelId={modelId}
           onModelChange={setModelId}
           streaming={status === "submitted" || status === "streaming"}
-          disabled={status !== "ready" || pendingQuestion || outOfCredits}
+          disabled={status !== "ready" || pendingQuestion}
           placeholder={
-            outOfCredits
-              ? "Out of credits"
-              : pendingQuestion
-                ? "Pick an answer above…"
-                : "Ask for a change…"
+            pendingQuestion ? "Pick an answer above…" : "Ask for a change…"
           }
         />
       </div>

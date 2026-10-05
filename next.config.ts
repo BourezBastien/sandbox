@@ -6,8 +6,10 @@ const nextConfig: NextConfig = {
 }
 
 export default withSentryConfig(nextConfig, {
-  org: "enra-r3",
-  project: "sandbox",
+  // Sentry is optional: without SENTRY_ORG / SENTRY_PROJECT / SENTRY_AUTH_TOKEN
+  // the plugin skips its uploads and the app runs unmonitored.
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
 
   // Build-time secret, used to upload source maps
   authToken: process.env.SENTRY_AUTH_TOKEN,
@@ -20,7 +22,7 @@ export default withSentryConfig(nextConfig, {
 
   // Same source as the server-side `release`, so both halves agree
   release: {
-    name: process.env.SENTRY_RELEASE ?? process.env.RAILWAY_GIT_COMMIT_SHA,
+    name: process.env.SENTRY_RELEASE ?? process.env.GIT_COMMIT_SHA,
   },
 
   silent: !process.env.CI,

@@ -1,10 +1,16 @@
 "use client"
 
-import { OrganizationSwitcher, UserButton } from "@clerk/nextjs"
-import { CoinsIcon, MessageSquareIcon, SquarePenIcon } from "lucide-react"
+import {
+  LogOutIcon,
+  MessageSquareIcon,
+  ShieldIcon,
+  SquarePenIcon,
+} from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useRouter } from "next/navigation"
+import { useTransition } from "react"
 
 import { GameMenu } from "@/components/game-menu"
 import { Empty, EmptyDescription } from "@/components/ui/empty"
@@ -26,21 +32,21 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuAction,
-  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { formatCredits } from "@/lib/billing/format"
+import { Spinner } from "@/components/ui/spinner"
+import { authClient } from "@/lib/auth-client"
 import type { Game } from "@/lib/db/schema"
 
 export function AppSidebar({
   games,
-  credits,
+  user,
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
   games: Game[]
-  credits: bigint
+  user: { name: string; username?: string | null; role?: string | null }
 }) {
   const pathname = usePathname()
 
@@ -165,36 +171,73 @@ export function AppSidebar({
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              isActive={pathname === "/billing"}
-              render={<Link href="/billing" />}
-            >
-              <CoinsIcon />
-              <span>Credits</span>
-            </SidebarMenuButton>
-            <SidebarMenuBadge>{formatCredits(credits)}</SidebarMenuBadge>
-          </SidebarMenuItem>
-        </SidebarMenu>
-        <div className="flex items-center justify-between gap-2 px-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
-          <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-            <OrganizationSwitcher
-              appearance={{
-                elements: {
-                  rootBox: "w-full! max-w-full",
-                  organizationSwitcherTrigger:
-                    "w-full! max-w-full justify-between!",
-                  organizationPreview: "min-w-0",
-                  organizationPreviewTextContainer: "min-w-0",
-                  organizationPreviewMainIdentifier: "truncate",
-                },
-              }}
-            />
-          </div>
-          <UserButton />
-        </div>
+        {user.role === "admin" && (
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                isActive={
+                  pathname === "/admin" || pathname.startsWith("/admin/")
+                }
+                render={<Link href="/admin" />}
+              >
+                <ShieldIcon />
+                <span>Administration</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        )}
+        <UserMenu name={user.name} username={user.username ?? undefined} />
       </SidebarFooter>
     </Sidebar>
+  )
+}
+
+/** Who is signed in, and the way out. */
+function UserMenu({ name, username }: { name: string; username?: string }) {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+
+  // The session cookie dies server-side with the sign-out call; the push is
+  // what moves this tab somewhere a signed-out user belongs.
+  function handleSignOut() {
+    startTransition(async () => {
+      await authClient.signOut()
+      router.push("/sign-in")
+    })
+  }
+
+  const initials = name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("")
+
+  return (
+    <div className="flex items-center gap-2 p-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0">
+      <span
+        aria-hidden
+        className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent text-xs font-medium text-sidebar-accent-foreground"
+      >
+        {initials || "?"}
+      </span>
+      <span className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
+        <span className="block truncate text-sm font-medium">{name}</span>
+        {username && (
+          <span className="block truncate text-xs text-muted-foreground">
+            {username}
+          </span>
+        )}
+      </span>
+      <button
+        type="button"
+        onClick={handleSignOut}
+        disabled={isPending}
+        aria-label="Sign out"
+        className="flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors group-data-[collapsible=icon]:hidden hover:bg-sidebar-accent hover:text-sidebar-accent-foreground disabled:opacity-50"
+      >
+        {isPending ? <Spinner /> : <LogOutIcon className="size-4" />}
+      </button>
+    </div>
   )
 }

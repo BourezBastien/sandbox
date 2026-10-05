@@ -47,7 +47,5 @@ Sentry.init({
   // `release` is deliberately not set here: withSentryConfig injects it at
   // build time, and an explicit `undefined` would overwrite that injection.
   environment:
-    process.env.SENTRY_ENVIRONMENT ??
-    process.env.RAILWAY_ENVIRONMENT_NAME ??
-    process.env.NODE_ENV,
+    process.env.SENTRY_ENVIRONMENT ?? process.env.NODE_ENV,
 })

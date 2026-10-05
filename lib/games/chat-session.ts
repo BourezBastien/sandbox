@@ -10,8 +10,8 @@ import { describeError } from "@/lib/observability"
  *
  * The session outlives the page, so deleting a game has to reach into
  * Trigger.dev as well as the database: a turn left streaming would keep calling
- * tools against a game that no longer exists, keep billing the org for it, and
- * — until the row is gone — could still create a sandbox nothing points at.
+ * tools against a game that no longer exists and — until the row is gone —
+ * could still create a sandbox nothing points at.
  *
  * The cancel comes first because closing does not stop a run: it flips
  * `closedAt` so further messages are rejected, which settles the next turn and
@@ -65,6 +65,49 @@ export async function endGameChatSession(gameId: string): Promise<void> {
       Sentry.logger
         .fmt`Could not close the chat session of deleted game ${gameId}`,
       { "game.id": gameId, ...describeError(error) }
+    )
+  }
+}
+
+/**
+ * Cancels whatever run a game's chat session has going, and stops there.
+ *
+ * The sibling of `endGameChatSession` for a block rather than a delete:
+ * closing a session is terminal — the thread could never send another turn —
+ * which is the right finality for a game being thrown away and the wrong one
+ * for a student who may be unblocked next week. Cancelling the run stops the
+ * in-flight build mid-stream while leaving the session able to accept the
+ * next message.
+ *
+ * Nothing here throws, for the same reason as above: the caller is mid-way
+ * through blocking someone and has more important work behind it.
+ */
+export async function cancelGameChatRun(gameId: string): Promise<void> {
+  let currentRunId: string | null | undefined
+
+  try {
+    ;({ currentRunId } = await sessions.retrieve(gameId))
+  } catch (error) {
+    Sentry.logger.debug(
+      Sentry.logger.fmt`No chat session to cancel a run for game ${gameId}`,
+      { "game.id": gameId, ...describeError(error) }
+    )
+
+    return
+  }
+
+  if (!currentRunId) {
+    return
+  }
+
+  try {
+    await runs.cancel(currentRunId)
+  } catch (error) {
+    // A run that finished on its own between the retrieve and this call —
+    // which is the outcome a block wants anyway.
+    Sentry.logger.debug(
+      Sentry.logger.fmt`Could not cancel run ${currentRunId} of game ${gameId}`,
+      { "game.id": gameId, "run.id": currentRunId, ...describeError(error) }
     )
   }
 }

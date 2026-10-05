@@ -1,0 +1,46 @@
+# Déploie le worker Trigger.dev (l'agent qui construit les jeux) sur chaque
+# push qui touche son code. Remplace `npm run trigger:deploy` en local :
+# tout passe par des secrets GitHub.
+#
+# À configurer une fois dans Settings → Secrets and variables → Actions :
+#   TRIGGER_SECRET_KEY   — clé du projet Trigger.dev (cloud.trigger.dev)
+#   TRIGGER_PROJECT_REF  — la réf du projet, ex. proj_xxxxxxxxxxxx
+#   SENTRY_ORG, SENTRY_PROJECT, SENTRY_AUTH_TOKEN — optionnel (source maps)
+#
+# Les variables d'exécution du worker (DATABASE_URL, Z_AI_API_KEY,
+# DAYTONA_API_KEY) se définissent dans le dashboard Trigger.dev, pas ici.
+name: Deploy Trigger.dev worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "trigger/**"
+      - "trigger.config.ts"
+      - "lib/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/deploy-trigger.yml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Deploy to Trigger.dev
+        run: npx trigger deploy
+        env:
+          TRIGGER_SECRET_KEY: ${{ secrets.TRIGGER_SECRET_KEY }}
+          TRIGGER_PROJECT_REF: ${{ secrets.TRIGGER_PROJECT_REF }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
