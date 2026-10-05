@@ -25,6 +25,15 @@ import type { GameModelId } from "./model-catalog"
 const zai = createAnthropic({
   baseURL: process.env.Z_AI_BASE_URL ?? "https://api.z.ai/api/anthropic",
   apiKey: process.env.Z_AI_API_KEY,
+  // z.ai's Anthropic-compatible endpoint has been seen accepting either auth
+  // convention - `x-api-key` (what the SDK sends by default) or
+  // `Authorization: Bearer` (what their own docs tell Claude Code users to
+  // use, and what subscription keys are issued for). Sending both costs
+  // nothing and rules out a stream that closes empty because the key on the
+  // wire was read by nobody.
+  headers: process.env.Z_AI_API_KEY
+    ? { Authorization: `Bearer ${process.env.Z_AI_API_KEY}` }
+    : undefined,
 })
 
 export const gameModels = {
