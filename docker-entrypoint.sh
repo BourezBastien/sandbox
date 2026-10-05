@@ -28,7 +28,9 @@ else
   # logs d'une ligne par frame. La sortie est capturée puis filtrée : seules
   # les lignes utiles (résultats, avertissements, erreurs) restent.
   PUSH_LOG=$(mktemp)
-  if npx drizzle-kit push --force >"$PUSH_LOG" 2>&1; then
+  # --verbose : sans lui, un échec de connexion à la base meurt sans un mot
+  # après le timeout TCP (~2 min), et il n'y a plus rien à lire dans les logs.
+  if npx drizzle-kit push --force --verbose >"$PUSH_LOG" 2>&1; then
     grep -av "Pulling schema from database" "$PUSH_LOG" || true
     echo ">> Schéma appliqué."
   else
