@@ -12,10 +12,10 @@
  */
 export const GAME_MODELS = [
   {
-    id: "glm-4.7-flash",
-    name: "GLM 4.7 Flash",
+    id: "glm-4.7-flashx",
+    name: "GLM 4.7 FlashX",
     tagline:
-      "Le plus rapide, et gratuit. Répond et construit sans attendre.",
+      "La vitesse du Flash, en file prioritaire. Quelques centimes par mois.",
   },
   {
     id: "glm-4.7",
@@ -26,7 +26,12 @@ export const GAME_MODELS = [
   {
     id: "glm-4.5-air",
     name: "GLM 4.5 Air",
-    tagline: "Rapide et léger. Parfait pour améliorer un jeu qui tourne.",
+    tagline: "Intermédiaire, avec réflexion.",
+  },
+  {
+    id: "glm-4.7-flash",
+    name: "GLM 4.7 Flash",
+    tagline: "Gratuit, mais en file d'attente : parfois 30 s de silence.",
   },
 ] as const
 
@@ -42,12 +47,13 @@ export type GameModelId = (typeof GAME_MODELS)[number]["id"]
 /**
  * What a turn runs on when nothing picked otherwise.
  *
- * Flash, not the flagship: z.ai turns thinking ON for the reasoning models
- * and offers no way to turn it off, which adds 5 to 9 seconds before the
- * first token of *every* step of a build. In a 30-minute class session,
- * snappy beats brilliant - the heavier models stay one picker click away.
+ * FlashX, the paid flash: same family speed without the free tier's queue
+ * (a 35-second wait for a first token was observed on the free flash), and
+ * a few cents a month at classroom scale. The reasoning models think before
+ * every answer (5 to 9 s, not reliably disable per z.ai's docs), so they
+ * stay opt-in for big builds.
  */
-export const DEFAULT_GAME_MODEL_ID: GameModelId = "glm-4.7-flash"
+export const DEFAULT_GAME_MODEL_ID: GameModelId = "glm-4.7-flashx"
 
 /**
  * Whether a value names a model this app offers.

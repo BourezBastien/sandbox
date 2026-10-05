@@ -87,15 +87,16 @@ Ouvrez `http://localhost:3000/install` pour créer le compte admin, puis créez 
 
 ### IA : z.ai (GLM)
 
-Le code parle à l'endpoint **Anthropic-compatible** de z.ai (`https://api.z.ai/api/anthropic/v1`) via `@ai-sdk/anthropic`. Seule l'URL et la clé changent. Trois modèles sont proposés dans le sélecteur :
+Le code parle à l'endpoint **Anthropic-compatible** de z.ai (`https://api.z.ai/api/anthropic/v1`) via `@ai-sdk/anthropic`. Seule l'URL et la clé changent. Quatre modèles sont proposés dans le sélecteur :
 
 | Modèle | id | Prix (par M de tokens, entrée / sortie) | Remarque |
 | --- | --- | --- | --- |
-| GLM 4.7 Flash (défaut) | `glm-4.7-flash` | gratuit | Le plus rapide : répond sans phase de réflexion, idéal en séance de 30 min. |
+| GLM 4.7 FlashX (défaut) | `glm-4.7-flashx` | $0.07 / $0.40 | La vitesse du Flash en file prioritaire (payant) : quelques centimes par mois pour une classe. |
 | GLM 4.7 | `glm-4.7` | $0.60 / $2.20 | Le plus doué, mais la réflexion (activée par défaut, non désactivable) ajoute 5 à 9 s avant chaque réponse. |
-| GLM 4.5 Air | `glm-4.5-air` | $0.20 / $1.10 | Intermédiaire. |
+| GLM 4.5 Air | `glm-4.5-air` | $0.20 / $1.10 | Intermédiaire, avec réflexion. |
+| GLM 4.7 Flash | `glm-4.7-flash` | gratuit | En file d'attente : parfois ~30 s de silence avant la première réponse. |
 
-> Pourquoi Flash par défaut : la [documentation z.ai](https://docs.z.ai/guides/capabilities/thinking-mode) confirme que la réflexion est **activée par défaut** sur la série GLM-4.7 et ne peut pas être coupée de façon fiable ; chaque étape d'une construction en hérite 5 à 9 secondes. Flash n'a pas ce comportement, et il est gratuit. Les modèles plus lourds restent à un clic dans le sélecteur, y compris pour un jeu déjà commencé.
+> Pourquoi FlashX par défaut : la [documentation z.ai](https://docs.z.ai/guides/capabilities/thinking-mode) confirme que la réflexion est **activée par défaut** sur la série GLM-4.7 et ne peut pas être coupée de façon fiable (5 à 9 s avant chaque réponse) ; le Flash gratuit, lui, a été observé en file d'attente (35 s mesurées avant le premier token). FlashX cumule la vitesse de la famille Flash et la priorité du payant, pour un coût dérisoire. Les modèles plus lourds restent à un clic dans le sélecteur, y compris pour un jeu déjà commencé.
 
 > **Clé d'abonnement vs clé API** : une clé « GLM Coding Plan » fonctionne sur le même endpoint pour tester seul, mais ses limites de prompts par tranche de 5 h ne conviennent pas à une classe entière. Pour les séances réelles, créez une clé API facturée à l'usage sur [api.z.ai](https://api.z.ai). Avec l'usage décrit ci-dessous, cela représente quelques dollars par mois.
 
@@ -127,7 +128,7 @@ L'essentiel :
 | Dokploy (app + Postgres) | votre serveur existant |
 | Trigger.dev Hobby | $10/mois (le calcul de la classe ≈ $1.50/mois, largement dans les crédits inclus) |
 | Daytona | ≈ $0 : les $200 de crédits offerts couvrent des années à ce rythme (bacs à sable auto-stoppés quand inactifs) |
-| z.ai | ≈ $0 avec GLM 4.7 Flash en défaut (gratuit) ; ~$10 à $20/mois si toute la classe construit en GLM 4.7 |
+| z.ai | ≈ $1 à $3/mois avec GLM 4.7 FlashX en défaut ; ~$10 à $20/mois si toute la classe construit en GLM 4.7 ; $0 avec le Flash gratuit (file d'attente possible) |
 
 Sources : [tarifs z.ai](https://docs.z.ai/guides/overview/pricing), [tarifs Trigger.dev](https://trigger.dev/pricing), [tarifs Daytona](https://www.daytona.io/pricing).
 

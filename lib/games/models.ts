@@ -96,6 +96,7 @@ const zai = createAnthropic({
 })
 
 export const gameModels = {
+  "glm-4.7-flashx": zai("glm-4.7-flashx"),
   "glm-4.7": zai("glm-4.7"),
   "glm-4.5-air": zai("glm-4.5-air"),
   "glm-4.7-flash": zai("glm-4.7-flash"),
