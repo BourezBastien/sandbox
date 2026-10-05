@@ -69,6 +69,33 @@ async function debugFetch(
   })
 }
 
+/**
+ * z.ai's Anthropic-compatible layer turns thinking ON by default for the
+ * reasoning models, and a thinking block in a streamed response with tools
+ * has been seen ending the SSE stream without a finish chunk - the SDK then
+ * fails the whole turn with NoOutputGeneratedError. z.ai's own API disables
+ * reasoning with exactly this body shape, so it is injected on every request
+ * that doesn't already carry one: thinking buys nothing here, the agent's
+ * budget is its 48 tool-call steps.
+ */
+function withThinkingDisabled(fetchFn: typeof fetch): typeof fetch {
+  return async (input, init) => {
+    if (typeof init?.body === "string") {
+      try {
+        const body = JSON.parse(init.body) as Record<string, unknown>
+
+        if (body && typeof body === "object" && !("thinking" in body)) {
+          init = { ...init, body: JSON.stringify({ ...body, thinking: { type: "disabled" } }) }
+        }
+      } catch {
+        // Not JSON, or not ours to touch: send it exactly as received.
+      }
+    }
+
+    return fetchFn(input, init)
+  }
+}
+
 const zai = createAnthropic({
   baseURL: process.env.Z_AI_BASE_URL ?? "https://api.z.ai/api/anthropic",
   apiKey: process.env.Z_AI_API_KEY,
@@ -81,7 +108,9 @@ const zai = createAnthropic({
   headers: process.env.Z_AI_API_KEY
     ? { Authorization: `Bearer ${process.env.Z_AI_API_KEY}` }
     : undefined,
-  fetch: process.env.Z_AI_DEBUG === "true" ? debugFetch : undefined,
+  fetch: withThinkingDisabled(
+    process.env.Z_AI_DEBUG === "true" ? debugFetch : fetch
+  ),
 })
 
 export const gameModels = {
