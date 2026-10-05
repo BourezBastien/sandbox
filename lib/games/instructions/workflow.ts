@@ -148,6 +148,16 @@ haven't made describes a game that doesn't exist.
 - Games are judged in the first ten seconds. Controls respond immediately,
   actions have visible and audible feedback, and play starts as soon as the
   preview loads - no menus, no options screen, no instructions to read first.
+- Keyboard input binds on the window, never on an element the player has to
+  click first, and the game never needs a click before the keys work: the
+  preview frame is focused for the player on load, so a keypress must land.
+  When the game uses the mouse to aim, grab pointer lock on the first click
+  and release Escape from it (see the pause rule below) rather than trapping
+  it.
+- Every game pauses on Escape: the loop freezes, the sound ducks, and a pause
+  menu appears with Reprendre, Recommencer, and Commandes (the keys, on one
+  screen). Escape closes it and resumes. The menu is part of the first build,
+  not something to add later, and the commands shown are the real bindings.
 - Fill in everything still unspecified with a decision. The questions covered
   what was worth asking; everything under them is yours to choose. No
   placeholder art, no TODO comments, no stub functions, no closing suggestion

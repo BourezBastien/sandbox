@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
+import { GameFrame } from "@/components/game-frame"
 import { db, games } from "@/lib/db"
 
 /**
@@ -69,10 +70,10 @@ export default async function PlayPage({
         </Link>
       </header>
       {game.sandboxId ? (
-        <iframe
+        <GameFrame
           src={`/api/games/${game.id}/share/index.html`}
           title={game.title}
-          className="w-full flex-1 border-0 bg-white"
+          className="w-full flex-1"
         />
       ) : (
         <p className="flex flex-1 items-center justify-center p-8 text-center text-sm text-muted-foreground">

@@ -243,6 +243,13 @@ export function ChatPreview({
       key={preview.revision}
       src={preview.url}
       title="Aperçu du jeu"
+      // The game's keyboard, mouse lock and fullscreen live inside this frame.
+      // `allow` grants the cross-origin frame the permissions it needs, and
+      // the load focus hands it the keyboard without a click first: keys
+      // typed straight after a turn land in the game, not in the page around
+      // it. focus() on a cross-origin window is one of the few calls allowed.
+      allow="fullscreen; pointer-lock; gamepad"
+      onLoad={() => frameRef.current?.contentWindow?.focus()}
       className="h-full w-full border-0 bg-white"
     />
   )
