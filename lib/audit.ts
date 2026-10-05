@@ -109,28 +109,7 @@ export async function recordGameTurn(gameId: string, messageCount: number) {
   }
 }
 
-export type AuditAction =
-  | "game.created"
-  | "game.renamed"
-  | "game.deleted"
-  | "game.turn"
-  | "user.created"
-  | "user.password_reset"
-  | "user.force_signed_out"
-  | "user.banned"
-  | "user.unbanned"
-  | "user.deleted"
-
-/** What each action reads as on the journal page. */
-export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
-  "game.created": "Jeu créé",
-  "game.renamed": "Jeu renommé",
-  "game.deleted": "Jeu supprimé",
-  "game.turn": "Tour de jeu",
-  "user.created": "Compte créé",
-  "user.password_reset": "Mot de passe réinitialisé",
-  "user.force_signed_out": "Déconnexion forcée",
-  "user.banned": "Compte bloqué",
-  "user.unbanned": "Compte débloqué",
-  "user.deleted": "Compte supprimé",
-}
+// The action vocabulary lives in `@/lib/audit-actions`, which is safe to
+// import from a client component; re-exported here for server-side callers.
+export type { AuditAction } from "@/lib/audit-actions"
+import type { AuditAction } from "@/lib/audit-actions"

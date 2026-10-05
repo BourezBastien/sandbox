@@ -1,33 +1,20 @@
 import { ScrollTextIcon } from "lucide-react"
 import type { Metadata } from "next"
 
+import { AuditEntry } from "@/components/admin/audit-entry"
 import { TablePagination } from "@/components/admin/table-pagination"
 import { Badge } from "@/components/ui/badge"
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
 import { AUDIT_PAGE_SIZE, listAuditLog } from "@/lib/admin/queries"
-import { AUDIT_ACTION_LABELS, type AuditAction } from "@/lib/audit"
 
 export const metadata: Metadata = {
   title: "Journal",
-}
-
-const TIME_FORMAT = new Intl.DateTimeFormat("fr-FR", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-})
-
-function actionLabel(action: string) {
-  return AUDIT_ACTION_LABELS[action as AuditAction] ?? action
 }
 
 /**
@@ -36,7 +23,8 @@ function actionLabel(action: string) {
  * This is the school's record - games created, renamed or deleted, turns
  * played, accounts managed - kept in the database whatever else was cleaned
  * up along the way. Message contents are not here; they stay on each game's
- * row, where the whole thread lives on.
+ * row, where the whole thread lives on. Clicking a line unfolds everything
+ * recorded about it, and links to the game when there is one.
  */
 export default async function AdminActivityPage({
   searchParams,
@@ -81,26 +69,12 @@ export default async function AdminActivityPage({
                   <TableHead>Qui</TableHead>
                   <TableHead>Action</TableHead>
                   <TableHead>Détail</TableHead>
+                  <TableHead className="w-10" />
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {rows.map((entry) => (
-                  <TableRow key={entry.id}>
-                    <TableCell className="whitespace-nowrap text-muted-foreground">
-                      {TIME_FORMAT.format(entry.createdAt)}
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {entry.actorLabel}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">
-                        {actionLabel(entry.action)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {entry.detail ?? ""}
-                    </TableCell>
-                  </TableRow>
+                  <AuditEntry key={entry.id} entry={entry} />
                 ))}
               </TableBody>
             </Table>

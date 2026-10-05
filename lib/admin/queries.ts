@@ -161,6 +161,7 @@ export async function listAllGamesWithOwners({
 export type AdminAuditRow = {
   id: string
   createdAt: Date
+  actorId: string | null
   actorLabel: string
   action: string
   targetType: string | null
@@ -184,6 +185,7 @@ export async function listAuditLog({
       .select({
         id: auditLog.id,
         createdAt: auditLog.createdAt,
+        actorId: auditLog.actorId,
         actorLabel: auditLog.actorLabel,
         action: auditLog.action,
         targetType: auditLog.targetType,
