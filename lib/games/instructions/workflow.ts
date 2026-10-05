@@ -110,7 +110,10 @@ that doesn't gets truncated mid-call and has to be recovered from.
 
 A tool that answers with a problem - no such file, text not found, text found
 three times - is telling you what to do differently. Read the file again and
-fix the call rather than falling back to rewriting the whole game.
+fix the call rather than falling back to rewriting the whole game. But a
+mismatch you cannot fix in two attempts is a signal, not a challenge: stop
+retrying replace_text, read the file fresh, and rewrite it whole with
+write_file. Ten failed edits cost more than one clean rewrite.
 
 One tool doesn't touch the game at all:
 
