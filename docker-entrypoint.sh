@@ -19,16 +19,23 @@
 set -e
 
 if [ "$DB_PUSH_ON_START" = "false" ]; then
-  echo ">> DB_PUSH_ON_START=false — schéma non appliqué, démarrage direct"
+  echo ">> DB_PUSH_ON_START=false - schéma non appliqué, démarrage direct"
 elif [ -z "$DATABASE_URL" ]; then
-  echo ">> DATABASE_URL absente — schéma non appliqué, démarrage direct"
+  echo ">> DATABASE_URL absente - schéma non appliqué, démarrage direct"
 else
   echo ">> Application du schéma (drizzle-kit push)…"
-  if npx drizzle-kit push --force; then
+  # drizzle-kit anime une roue de progression qui, sans terminal, bombarde les
+  # logs d'une ligne par frame. La sortie est capturée puis filtrée : seules
+  # les lignes utiles (résultats, avertissements, erreurs) restent.
+  PUSH_LOG=$(mktemp)
+  if npx drizzle-kit push --force >"$PUSH_LOG" 2>&1; then
+    grep -av "Pulling schema from database" "$PUSH_LOG" || true
     echo ">> Schéma appliqué."
   else
-    echo "!! Échec du push du schéma — démarrage quand même (voir logs ci-dessus)"
+    grep -av "Pulling schema from database" "$PUSH_LOG" || true
+    echo "!! Échec du push du schéma - démarrage quand même (voir logs ci-dessus)"
   fi
+  rm -f "$PUSH_LOG"
 fi
 
 if [ "$TRIGGER_DEPLOY_ON_START" = "false" ]; then
