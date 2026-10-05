@@ -82,7 +82,7 @@ export default async function AdminGamesPage() {
                       {game.ownerUsername && (
                         <span className="text-muted-foreground/70">
                           {" "}
-                          · {game.ownerUsername}
+                          ({game.ownerUsername})
                         </span>
                       )}
                     </TableCell>

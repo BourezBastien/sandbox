@@ -1,7 +1,7 @@
 import type { Sandbox } from "@daytona/sdk"
 import { eq } from "drizzle-orm"
 
-import { daytona } from "@/lib/daytona/client"
+import { getDaytona } from "@/lib/daytona/client"
 // Imported straight from `./client` rather than `@/lib/db`, like the chat
 // store: this module runs inside the Trigger.dev worker, where the
 // `server-only` marker on the `@/lib/db` entry would throw.
@@ -32,7 +32,7 @@ export async function createGameSandbox(
   const startedAt = performance.now()
   const { folders, files } = await readRuntimeFiles(GAME_DIR)
 
-  const sandbox = await daytona.create({ labels: { gameId } })
+  const sandbox = await getDaytona().create({ labels: { gameId } })
 
   await sandbox.fs.createFolder(GAME_DIR, "755")
 
@@ -85,13 +85,13 @@ export async function deleteGameSandboxes(
   const startedAt = performance.now()
   const sandboxes = new Map<string, Sandbox>()
 
-  for await (const sandbox of daytona.list({ labels: { gameId } })) {
+  for await (const sandbox of getDaytona().list({ labels: { gameId } })) {
     sandboxes.set(sandbox.id, sandbox)
   }
 
   if (sandboxId && !sandboxes.has(sandboxId)) {
     try {
-      sandboxes.set(sandboxId, await daytona.get(sandboxId))
+      sandboxes.set(sandboxId, await getDaytona().get(sandboxId))
     } catch (error) {
       // Almost always a sandbox that is already gone, which is nothing to
       // delete and no reason to fail - but it is also the only signal that a
@@ -114,7 +114,7 @@ export async function deleteGameSandboxes(
     }
 
     try {
-      await daytona.delete(sandbox)
+      await getDaytona().delete(sandbox)
       deleted += 1
     } catch (error) {
       failed.push(sandbox.id)
@@ -197,7 +197,7 @@ export async function getGameSandbox(
     return createGameSandbox(gameId)
   }
 
-  const sandbox = await daytona.get(game.sandboxId)
+  const sandbox = await getDaytona().get(game.sandboxId)
 
   if (sandbox.state !== "started") {
     const startedAt = performance.now()
@@ -249,7 +249,7 @@ export async function startGameServer(
   sandboxId: string
 ): Promise<{ sandbox: Sandbox }> {
   const startedAt = performance.now()
-  const sandbox = await daytona.get(sandboxId)
+  const sandbox = await getDaytona().get(sandboxId)
 
   // Sandboxes stop themselves once idle, and a stopped one serves nothing.
   const wasStopped = sandbox.state !== "started"

@@ -124,7 +124,7 @@ L'essentiel :
 | Dokploy (app + Postgres) | votre serveur existant |
 | Trigger.dev Hobby | $10/mois (le calcul de la classe ≈ $1.50/mois, largement dans les crédits inclus) |
 | Daytona | ≈ $0 : les $200 de crédits offerts couvrent des années à ce rythme (bacs à sable auto-stoppés quand inactifs) |
-| z.ai | ≈ $10–20/mois avec GLM 4.7 en défaut ; ~$5 avec Air ; $0 avec Flash |
+| z.ai | ≈ $10 à $20/mois avec GLM 4.7 en défaut ; ~$5 avec Air ; $0 avec Flash |
 
 Sources : [tarifs z.ai](https://docs.z.ai/guides/overview/pricing), [tarifs Trigger.dev](https://trigger.dev/pricing), [tarifs Daytona](https://www.daytona.io/pricing).
 

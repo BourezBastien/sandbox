@@ -1,7 +1,7 @@
 <!-- BEGIN:nextjs-agent-rules -->
 # This is NOT the Next.js you know
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+This version has breaking changes - APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
 # Project overview
@@ -15,22 +15,22 @@ React 19, Better Auth (username/password, admin-created accounts, roles
 admin/user), self-hosted Postgres via Drizzle, Sentry (optional). There is no
 billing and no self sign-up.
 
-- `app/` — routes. `(app)/` is the signed-in space (home, games, `/admin`);
+- `app/` - routes. `(app)/` is the signed-in space (home, games, `/admin`);
   `install/` is the one-time admin bootstrap; `api/auth/[...all]` serves Better
   Auth; `api/games/[id]/preview` serves the live preview from the sandbox.
-- `components/` — app components; `components/ui/` is shadcn (style `base-nova`).
-- `lib/auth.ts` (+ `lib/auth-client.ts`) — Better Auth server/browser setup.
-- `lib/admin/` — admin queries and server actions (accounts, ban, reset).
-- `lib/games/` — agent logic: instructions, tools, chat store, model catalog,
+- `components/` - app components; `components/ui/` is shadcn (style `base-nova`).
+- `lib/auth.ts` (+ `lib/auth-client.ts`) - Better Auth server/browser setup.
+- `lib/admin/` - admin queries and server actions (accounts, ban, reset).
+- `lib/games/` - agent logic: instructions, tools, chat store, model catalog,
   and the seeded engine files copied into every sandbox.
-- `lib/db/` — Drizzle schema and client. `trigger/` — Trigger.dev tasks;
+- `lib/db/` - Drizzle schema and client. `trigger/` - Trigger.dev tasks;
   `trigger/init.ts` runs before every task (Sentry for the worker).
 
 # Commands
 
 ```bash
 npm run dev            # Next.js dev server
-npm run trigger:dev    # Trigger.dev worker — game building needs it running
+npm run trigger:dev    # Trigger.dev worker - game building needs it running
 npm run typecheck      # tsc --noEmit
 npm run lint           # eslint
 npm run format         # prettier --write
@@ -56,9 +56,9 @@ npm run db:push
 ```
 
 `db:push` diffs the schema against the database and applies the change
-directly. If a change is destructive, Drizzle Kit will prompt — accept it and
+directly. If a change is destructive, Drizzle Kit will prompt - accept it and
 move on. When a change replaces a table outright, drop the obsolete table
-first, then push — that removes the rename ambiguity and push runs unattended.
+first, then push - that removes the rename ambiguity and push runs unattended.
 
 The Better Auth tables (`user`, `session`, `account`, `verification`) are
 hand-written in `lib/db/schema.ts` to match what the library expects (core +
@@ -71,7 +71,7 @@ The Next.js server and the Trigger.dev worker both import `lib/daytona/*` and
 `lib/games/tools`. Rules that follow from that:
 
 - Import `@/lib/db` (the `server-only` entry) from Next.js code only; Trigger.dev
-  task code imports `@/lib/db/client` directly — the guard throws in the worker.
+  task code imports `@/lib/db/client` directly - the guard throws in the worker.
 - `@/lib/auth` is Next-only (it is `server-only` and uses `next/headers`); the
   worker never imports it. The worker authorizes games by row, not by session.
 - Log through `logger` from `@/lib/observability` (built on `@sentry/core`) in
@@ -82,26 +82,26 @@ The Next.js server and the Trigger.dev worker both import `lib/daytona/*` and
 
 - Guards: `requireSession()` (`lib/auth.ts`) in pages/layouts,
   `authorizeGame()` for anything that names a game, `requireAdmin()` in
-  `lib/admin/actions.ts`. `proxy.ts` only checks cookie presence — never make
+  `lib/admin/actions.ts`. `proxy.ts` only checks cookie presence - never make
   it the real boundary (Next 16: Server Functions are POSTs to page routes).
 - Account creation goes through `insertAccount()` in `lib/admin/actions.ts`
   (Better Auth's internal adapter: scrypt hash + credential account). The
   public sign-up endpoint is disabled (`emailAndPassword.disableSignUp`).
-- No session `cookieCache` — a ban must revoke access on the very next
+- No session `cookieCache` - a ban must revoke access on the very next
   request. Banning = `auth.api.banUser` + `revokeUserSessions` + cancelling
   in-flight chat runs (`cancelGameChatRun`, which must NOT close the chat
-  session — closing is terminal for a thread).
+  session - closing is terminal for a thread).
 - The admin role bypasses game ownership (`getGame` in `lib/games/queries.ts`)
   so `/admin/games` can open any student's game, live preview included.
 
 # Worker and bundler gotchas
 
 - `lib/games/runtime/**` is plain browser html/css/js seed content copied
-  verbatim into each game's sandbox — not app source. ESLint ignores it, and it
+  verbatim into each game's sandbox - not app source. ESLint ignores it, and it
   reaches the deployed worker only via `additionalFiles` in `trigger.config.ts`.
 - `trigger.config.ts` keeps `@daytona/sdk` external at deploy through a custom
   esbuild plugin plus an install layer. The comment there explains why
-  `build.external` alone does not work — read it before touching that setup.
+  `build.external` alone does not work - read it before touching that setup.
 
 # AI provider
 
@@ -109,7 +109,7 @@ The Next.js server and the Trigger.dev worker both import `lib/daytona/*` and
   `lib/games/models.ts` (provider instances via z.ai's Anthropic-compatible
   endpoint, `Z_AI_API_KEY`/`Z_AI_BASE_URL`). The two records must stay in step
   (`satisfies` enforces it).
-- Game titles generate with the free tier (`glm-4.7-flash`) — keep it free.
+- Game titles generate with the free tier (`glm-4.7-flash`) - keep it free.
 
 # Code style
 
