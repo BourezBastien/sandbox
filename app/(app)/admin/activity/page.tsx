@@ -45,7 +45,7 @@ export default async function AdminActivityPage({
         <span className="font-heading text-sm font-medium">Journal</span>
         <Badge variant="secondary">{total}</Badge>
       </header>
-      <div className="mx-auto w-full max-w-6xl px-6 py-10">
+      <div className="mx-auto w-full max-w-[1600px] px-8 py-10">
         <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
           <ScrollTextIcon className="size-5 text-muted-foreground" />
           Journal d&apos;activité

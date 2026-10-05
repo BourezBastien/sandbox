@@ -26,7 +26,7 @@ export default async function AdminPage() {
         <ShieldIcon className="size-4 text-muted-foreground" />
         <span className="font-heading text-sm font-medium">Administration</span>
       </header>
-      <div className="mx-auto w-full max-w-5xl px-6 py-10">
+      <div className="mx-auto w-full max-w-[1600px] px-8 py-10">
         <h1 className="text-2xl font-semibold tracking-tight">
           Vue d&apos;ensemble
         </h1>

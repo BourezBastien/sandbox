@@ -108,7 +108,7 @@ export default async function AdminGamesPage({
         <span className="font-heading text-sm font-medium">Jeux</span>
         <Badge variant="secondary">{total}</Badge>
       </header>
-      <div className="mx-auto w-full max-w-6xl px-6 py-10">
+      <div className="mx-auto w-full max-w-[1600px] px-8 py-10">
         <h1 className="text-2xl font-semibold tracking-tight">
           {total === 1 ? "1 jeu" : `${total} jeux`}
         </h1>
