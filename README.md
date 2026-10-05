@@ -80,14 +80,14 @@ Ouvrez `http://localhost:3000/install` pour créer le compte admin, puis créez 
 | `BETTER_AUTH_URL` | URL publique de l'app (ex. `https://sandbox.mon-college.fr`) |
 | `BETTER_AUTH_TRUSTED_ORIGINS` | Optionnel : origines autorisées, séparées par des virgules |
 | `Z_AI_API_KEY` | Clé z.ai (voir ci-dessous) |
-| `Z_AI_BASE_URL` | Optionnel : endpoint Anthropic-compatible (`https://api.z.ai/api/anthropic` par défaut) |
+| `Z_AI_BASE_URL` | Optionnel : endpoint Anthropic-compatible (`https://api.z.ai/api/anthropic/v1` par défaut) |
 | `TRIGGER_SECRET_KEY` | Clé du projet Trigger.dev (doit aussi être définie dans l'environnement du worker) |
 | `DAYTONA_API_KEY` | Clé Daytona pour les bacs à sable |
 | `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` | Optionnel : Sentry (erreurs, logs, source maps) |
 
 ### IA : z.ai (GLM)
 
-Le code parle à l'endpoint **Anthropic-compatible** de z.ai (`https://api.z.ai/api/anthropic`) via `@ai-sdk/anthropic`. Seule l'URL et la clé changent. Trois modèles sont proposés dans le sélecteur :
+Le code parle à l'endpoint **Anthropic-compatible** de z.ai (`https://api.z.ai/api/anthropic/v1`) via `@ai-sdk/anthropic`. Seule l'URL et la clé changent. Trois modèles sont proposés dans le sélecteur :
 
 | Modèle | id | Prix (par M de tokens, entrée / sortie) |
 | --- | --- | --- |

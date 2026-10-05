@@ -71,46 +71,28 @@ async function debugFetch(
 
 /**
  * z.ai's Anthropic-compatible layer turns thinking ON by default for the
- * reasoning models, and a thinking block in a streamed response with tools
- * has been seen ending the SSE stream without a finish chunk - the SDK then
- * fails the whole turn with NoOutputGeneratedError. z.ai's own API disables
- * reasoning with exactly this body shape, so it is injected on every request
- * that doesn't already carry one: thinking buys nothing here, the agent's
- * budget is its 48 tool-call steps.
+ * reasoning models. Left as is: Claude Code talks to this endpoint the same
+ * way, thinking included, and it streams fine - the failures that looked
+ * like a thinking problem were the missing /v1 in the URL below.
  */
-function withThinkingDisabled(fetchFn: typeof fetch): typeof fetch {
-  return async (input, init) => {
-    if (typeof init?.body === "string") {
-      try {
-        const body = JSON.parse(init.body) as Record<string, unknown>
-
-        if (body && typeof body === "object" && !("thinking" in body)) {
-          init = { ...init, body: JSON.stringify({ ...body, thinking: { type: "disabled" } }) }
-        }
-      } catch {
-        // Not JSON, or not ours to touch: send it exactly as received.
-      }
-    }
-
-    return fetchFn(input, init)
-  }
-}
 
 const zai = createAnthropic({
-  baseURL: process.env.Z_AI_BASE_URL ?? "https://api.z.ai/api/anthropic",
+  // The /v1 is not optional: the SDK appends "/messages" to the baseURL
+  // (Anthropic's own baseURL already carries /v1), so without it every call
+  // lands on a path z.ai answers with {"code":500,"msg":"404 NOT_FOUND"} -
+  // wrapped in HTTP 200, which the SDK then reads as an SSE stream that
+  // produces nothing and closes without a finish chunk.
+  baseURL:
+    process.env.Z_AI_BASE_URL ?? "https://api.z.ai/api/anthropic/v1",
   apiKey: process.env.Z_AI_API_KEY,
-  // z.ai's Anthropic-compatible endpoint has been seen accepting either auth
-  // convention - `x-api-key` (what the SDK sends by default) or
-  // `Authorization: Bearer` (what their own docs tell Claude Code users to
-  // use, and what subscription keys are issued for). Sending both costs
-  // nothing and rules out a stream that closes empty because the key on the
-  // wire was read by nobody.
+  // z.ai's Anthropic-compatible endpoint accepts either auth convention -
+  // `x-api-key` (what the SDK sends by default) or `Authorization: Bearer`
+  // (what their own docs tell Claude Code users to use, and what
+  // subscription keys are issued for). Sending both costs nothing.
   headers: process.env.Z_AI_API_KEY
     ? { Authorization: `Bearer ${process.env.Z_AI_API_KEY}` }
     : undefined,
-  fetch: withThinkingDisabled(
-    process.env.Z_AI_DEBUG === "true" ? debugFetch : fetch
-  ),
+  fetch: process.env.Z_AI_DEBUG === "true" ? debugFetch : undefined,
 })
 
 export const gameModels = {
