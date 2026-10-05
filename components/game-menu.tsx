@@ -1,6 +1,12 @@
 "use client"
 
-import { EllipsisIcon, PencilLineIcon, Trash2Icon } from "lucide-react"
+import {
+  CheckIcon,
+  EllipsisIcon,
+  PencilLineIcon,
+  ShareIcon,
+  Trash2Icon,
+} from "lucide-react"
 import { usePathname } from "next/navigation"
 import { useState, useTransition } from "react"
 
@@ -67,6 +73,25 @@ export function GameMenu({
   const [name, setName] = useState(title)
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const [copied, setCopied] = useState(false)
+
+  // The share link outlives the page: /play/<id> is public and permanent for
+  // as long as the game exists. Clipboard needs a user gesture, which the
+  // menu item is; the check mark is the only feedback a copy needs.
+  async function handleShare() {
+    try {
+      await navigator.clipboard.writeText(
+        `${window.location.origin}/play/${gameId}`
+      )
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Clipboard can be denied (permissions, insecure context). The link is
+      // still one address bar away: open the page in a new tab as a fallback
+      // the reader can copy from.
+      window.open(`/play/${gameId}`, "_blank")
+    }
+  }
 
   // The box starts from what the game is called now, every time - a name
   // abandoned in a previous open should not come back on the next one.
@@ -137,7 +162,15 @@ export function GameMenu({
         </DropdownMenuTrigger>
         {/* Anchored to the trigger's right edge, which is the window's - a menu
             aligned the other way would hang off the screen. */}
-        <DropdownMenuContent align="end" className="w-40">
+        <DropdownMenuContent align="end" className="w-44">
+          <DropdownMenuItem onClick={() => void handleShare()}>
+            {copied ? (
+              <CheckIcon className="text-green-600" />
+            ) : (
+              <ShareIcon />
+            )}
+            {copied ? "Lien copié !" : "Partager le jeu"}
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => openDialog("rename")}>
             <PencilLineIcon />
             Renommer
