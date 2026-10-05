@@ -13,7 +13,7 @@ import {
 export default async function Page() {
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-6">
-      <Empty className="flex-none">
+      <Empty className="w-full max-w-5xl flex-none px-4">
         <EmptyHeader>
           <EmptyMedia>
             <Image src="/logo.svg" alt="Logo" width={48} height={48} />
@@ -27,7 +27,7 @@ export default async function Page() {
             jouer.
           </EmptyDescription>
         </EmptyHeader>
-        <EmptyContent className="max-w-2xl gap-6">
+        <EmptyContent className="w-full max-w-3xl gap-6">
           <NewGameComposer />
         </EmptyContent>
       </Empty>

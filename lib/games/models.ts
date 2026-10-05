@@ -104,6 +104,37 @@ function withReasoningEffortLow(fetchFn: typeof fetch): typeof fetch {
   }
 }
 
+/**
+ * DeepSeek's thinking is off-switchable (unlike z.ai's GLM-5.3 family), and
+ * their docs document exactly this body shape. A game built through 48
+ * tool-call steps does not need a meditation before each one: injected on
+ * every DeepSeek request that doesn't already carry a thinking preference.
+ */
+function withThinkingDisabled(fetchFn: typeof fetch): typeof fetch {
+  return async (input, init) => {
+    if (typeof init?.body === "string") {
+      try {
+        const body = JSON.parse(init.body) as Record<string, unknown>
+
+        if (
+          body &&
+          typeof body === "object" &&
+          !("thinking" in body)
+        ) {
+          init = {
+            ...init,
+            body: JSON.stringify({ ...body, thinking: { type: "disabled" } }),
+          }
+        }
+      } catch {
+        // Not JSON, or not ours to touch: send it exactly as received.
+      }
+    }
+
+    return fetchFn(input, init)
+  }
+}
+
 const zai = createAnthropic({
   // The /v1 is not optional: the SDK appends "/messages" to the baseURL
   // (Anthropic's own baseURL already carries /v1), so without it every call
@@ -125,8 +156,22 @@ const zai = createAnthropic({
   ),
 })
 
+// Same pattern as zai: the SDK appends "/messages", DeepSeek's Anthropic
+// base is /anthropic, so the /v1 rides in the baseURL. DeepSeek authenticates
+// with `Authorization: Bearer` - sent alongside the SDK's `x-api-key`.
+const deepseek = createAnthropic({
+  baseURL:
+    process.env.DEEPSEEK_BASE_URL ?? "https://api.deepseek.com/anthropic/v1",
+  apiKey: process.env.DEEPSEEK_API_KEY,
+  headers: process.env.DEEPSEEK_API_KEY
+    ? { Authorization: `Bearer ${process.env.DEEPSEEK_API_KEY}` }
+    : undefined,
+  fetch: withThinkingDisabled(fetch),
+})
+
 export const gameModels = {
-  "glm-4.7-flash": zai("glm-4.7-flash"),
+  "deepseek-flash": deepseek("deepseek-flash"),
+  "deepseek-v4-pro": deepseek("deepseek-v4-pro"),
   "glm-5.3-flash": zai("glm-5.3-flash"),
-  "glm-5.3": zai("glm-5.3"),
+  "glm-4.7-flash": zai("glm-4.7-flash"),
 } satisfies Record<GameModelId, LanguageModel>

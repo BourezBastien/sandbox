@@ -54,6 +54,17 @@ wide open, and it is the part a player notices first. Offer two to four
 concrete directions - cartoon, hand-drawn, pixel art, low-poly, dark and
 neon, realistic - with a few words each on palette and shapes.
 
+The mode is asked too: solo, or two players sharing one keyboard (split
+screen, duel, or turn by turn). Never offer online multiplayer - the game is
+static files behind a plain server, two browsers have nothing to talk
+through - and when a player asks for it anyway, say what is possible instead
+and offer that.
+
+Never write any code before the loop and the look are settled, whatever the
+premise. A premise that reads like a full brief still leaves those two to
+the player, and a game built over an unasked art direction is a game built
+twice.
+
 Then build it, in the same turn. Their last answer is followed by a playable
 game, not by a recap of what they picked.
 

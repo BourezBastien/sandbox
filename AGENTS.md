@@ -106,10 +106,12 @@ The Next.js server and the Trigger.dev worker both import `lib/daytona/*` and
 # AI provider
 
 - Models come from `lib/games/model-catalog.ts` (client-safe ids/copy) and
-  `lib/games/models.ts` (provider instances via z.ai's Anthropic-compatible
-  endpoint, `Z_AI_API_KEY`/`Z_AI_BASE_URL`). The two records must stay in step
+  `lib/games/models.ts` (provider instances: DeepSeek and z.ai, both through
+  their Anthropic-compatible endpoints, baseURLs ending in /v1 because the
+  SDK appends only /messages). The two records must stay in step
   (`satisfies` enforces it).
-- Game titles generate with the free tier (`glm-4.7-flash`) - keep it free.
+- Game titles generate on `deepseek-flash` with thinking disabled (steady,
+  queue-free; z.ai's free flash queues at peak hours).
 
 # Code style
 

@@ -79,23 +79,25 @@ Ouvrez `http://localhost:3000/install` pour créer le compte admin, puis créez 
 | `BETTER_AUTH_SECRET` | Secret de chiffrement des sessions, 32+ caractères (`openssl rand -base64 32`) |
 | `BETTER_AUTH_URL` | URL publique de l'app (ex. `https://sandbox.mon-college.fr`) |
 | `BETTER_AUTH_TRUSTED_ORIGINS` | Optionnel : origines autorisées, séparées par des virgules |
-| `Z_AI_API_KEY` | Clé z.ai (voir ci-dessous) |
-| `Z_AI_BASE_URL` | Optionnel : endpoint Anthropic-compatible (`https://api.z.ai/api/anthropic/v1` par défaut) |
+| `Z_AI_API_KEY` | Clé z.ai (modèles GLM, options du sélecteur) |
+| `DEEPSEEK_API_KEY` | Clé DeepSeek ([platform.deepseek.com](https://platform.deepseek.com/api_keys)) : **requis pour le modèle par défaut** |
 | `TRIGGER_SECRET_KEY` | Clé du projet Trigger.dev (doit aussi être définie dans l'environnement du worker) |
 | `DAYTONA_API_KEY` | Clé Daytona pour les bacs à sable |
 | `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` | Optionnel : Sentry (erreurs, logs, source maps) |
 
 ### IA : z.ai (GLM)
 
-Le code parle à l'endpoint **Anthropic-compatible** de z.ai (`https://api.z.ai/api/anthropic/v1`) via `@ai-sdk/anthropic`. Seule l'URL et la clé changent. Trois modèles sont proposés dans le sélecteur :
+L'app parle à deux fournisseurs via leurs endpoints **Anthropic-compatible** : DeepSeek (`https://api.deepseek.com/anthropic/v1`) et z.ai (`https://api.z.ai/api/anthropic/v1`). Quatre modèles sont proposés dans le sélecteur :
 
-| Modèle | id | Remarque |
+| Modèle | Fournisseur | Remarque |
 | --- | --- | --- |
-| GLM 4.7 Flash (défaut) | `glm-4.7-flash` | **Le seul vraiment rapide** : répond en 3-4 s, sans phase de réflexion. Gratuit, accepté par la clé Coding Plan. |
-| GLM 5.3 Flash | `glm-5.3-flash` | Inclus dans l'abonnement (multiplicateurs 2.3/0.56/8). Réflexion obligatoire : ~8 s avant la première réponse. |
-| GLM 5.3 | `glm-5.3` | Le plus doué, inclus dans l'abonnement (6.9/1.7/24). Pour les grosses constructions, réflexion longue. |
+| DeepSeek Flash (défaut) | DeepSeek | **Rapide et régulier** : réflexion désactivable (et désactivée), pas de file observée, 2 500 connexions simultanées par compte. Clé [platform.deepseek.com](https://platform.deepseek.com/api_keys). |
+| DeepSeek V4 Pro | DeepSeek | Le plus doué pour le code. Réfléchit avant chaque réponse : pour les grosses constructions. |
+| GLM 5.3 Flash | z.ai | Inclus dans l'abonnement Coding Plan. Réflexion obligatoire : 5 à 9 s par réponse. |
+| GLM 4.7 Flash | z.ai | Gratuit et très rapide aux heures creuses ; saturé aux heures de pointe (529 + 46 s observés). |
 
-> **Le compromis vitesse, en clair** : la [documentation z.ai](https://docs.z.ai/guides/capabilities/thinking-mode) impose la réflexion sur les modèles GLM-5.3 (« forced thinking, cannot be disabled »), et les traces le confirment (8 s et plus avant le premier token, même avec `reasoning_effort: low`). `glm-4.7-flash` est le seul modèle observé sans réflexion (3-4 s), il fonctionne avec la clé Coding Plan, et il est gratuit. C'est donc lui par défaut ; les modèles de l'abonnement restent au sélecteur pour les constructions lourdes. Les autres modèles du catalogue API (FlashX...) ne sont pas couverts par l'abonnement : sans solde prépayé, z.ai répond `429 - Insufficient balance`.
+> **Pourquoi DeepSeek Flash par défaut** : après une soirée de traces, le bilan est net. Chez z.ai, les modèles de l'abonnement réfléchissent obligatoirement (« forced thinking », 5-9 s constants) et le Flash gratuit s'embouteille aux heures de pointe (529 « overloaded », 46 s d'attente mesurées). DeepSeek est le seul fournisseur dont le modèle rapide **peut couper la réflexion** (documenté dans leur [guide Thinking Mode](https://api-docs.deepseek.com/guides/thinking_mode)) : réponse directe, à toute heure, pour quelques centimes (cache hit 0,006 $/M, entrée 0,30 $/M, sortie 1,20 $/M en heures pleines, moitié hors pic). Les GLM restent au sélecteur : l'abonnement n'est pas perdu, il est en option.
+
 
 ---
 
@@ -125,7 +127,7 @@ L'essentiel :
 | Dokploy (app + Postgres) | votre serveur existant |
 | Trigger.dev Hobby | $10/mois (le calcul de la classe ≈ $1.50/mois, largement dans les crédits inclus) |
 | Daytona | ≈ $0 : les $200 de crédits offerts couvrent des années à ce rythme (bacs à sable auto-stoppés quand inactifs) |
-| z.ai | 0 € de plus avec l'abonnement Coding Plan (GLM 5.3 Flash en défaut, crédits du plan) ; ~$10 à $20/mois en clé API à l'usage avec GLM 5.3 |
+| IA (DeepSeek) | ~$3 à $8/mois avec DeepSeek Flash en défaut (pay-as-you-go) ; 0 € de plus si la classe repasse sur les GLM de l'abonnement |
 
 Sources : [tarifs z.ai](https://docs.z.ai/guides/overview/pricing), [tarifs Trigger.dev](https://trigger.dev/pricing), [tarifs Daytona](https://www.daytona.io/pricing).
 

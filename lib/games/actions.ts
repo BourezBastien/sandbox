@@ -22,9 +22,9 @@ import {
 import { truncateTitle } from "@/lib/games/title"
 import { describeError, elapsed } from "@/lib/observability"
 
-// The fast model of the catalog - naming a game is one short call, and it
-// must not inherit the thinking models' 8-second warm-up.
-const TITLE_MODEL = "glm-4.7-flash"
+// The steady fast model - naming a game is one short call, and it must not
+// inherit any queue (a 46 s title would read as a broken create).
+const TITLE_MODEL = "deepseek-flash"
 
 /**
  * Names a game after the prompt it was created from.

@@ -34,7 +34,8 @@
 
    ```env
    DATABASE_URL=postgres://...:...@ADRESSE_PUBLIQUE:5432/sandbox  (voir étape 2)
-   Z_AI_API_KEY=...
+   DEEPSEEK_API_KEY=...   (modèle par défaut de l'app)
+   Z_AI_API_KEY=...       (options GLM du sélecteur)
    DAYTONA_API_KEY=...
    ```
 
@@ -94,7 +95,8 @@ BETTER_AUTH_URL=https://games.oxanaut.app
 # Origines de confiance pour les requêtes d'authentification
 BETTER_AUTH_TRUSTED_ORIGINS=https://games.oxanaut.app
 
-# IA
+# IA : DeepSeek (modèle par défaut) et z.ai (options GLM)
+DEEPSEEK_API_KEY=
 Z_AI_API_KEY=
 
 # Daytona
@@ -174,7 +176,7 @@ curl -I https://games.oxanaut.app
 | Logs : `TRIGGER_ACCESS_TOKEN / TRIGGER_PROJECT_REF absents` | Ajoutez-les dans l'onglet Environment, puis redeployez |
 | Logs : `Échec du déploiement du worker` | Vérifiez le token (cloud.trigger.dev/account/tokens) et la réf projet. Le conteneur a démarré quand même : redeployez après correction |
 | `/install` redirige vers `/sign-in` | Un admin existe déjà, la base n'est pas vide |
-| Erreur 500 au premier tour de jeu | Vérifiez `Z_AI_API_KEY` (app) **et** chez Trigger.dev |
+| Erreur au premier tour de jeu | Vérifiez `DEEPSEEK_API_KEY` (app **et** Trigger.dev) : c'est le modèle par défaut |
 | `Game has no sandbox yet` persistant | Vérifiez `DAYTONA_API_KEY` chez Trigger.dev |
 | Le run Trigger échoue : connexion DB | Le worker utilise l'URL **publique** de la base (étape 2.3) |
 | Cookie de session rejeté | `BETTER_AUTH_URL` doit être exactement l'URL publique finale |
