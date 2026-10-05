@@ -1,14 +1,21 @@
 #!/bin/sh
-# Applique le schéma Drizzle à la base, puis démarre l'application.
+# Prépare puis démarre l'application :
+#   1. applique le schéma de la base (drizzle-kit push)
+#   2. déploie le worker Trigger.dev (l'agent qui construit les jeux)
+#   3. démarre Next.js
 #
 # Le projet n'a pas de fichiers de migration (workflow `db:push`, voir
 # AGENTS.md) : le schéma vivant est `lib/db/schema.ts`, et c'est lui qui est
 # poussé ici. Sur une base déjà à jour c'est un no-op rapide ; sur une base
 # vide c'est ce qui crée les tables avant la première requête.
 #
-# `--force` valide automatiquement les changements destructifs — accepté pour
-# ce projet (pas de données de production à préserver, cf. AGENTS.md).
-# Désactivable avec DB_PUSH_ON_START=false (dépannage, base gérée à la main).
+# Le code du worker (`trigger/`) doit être envoyé à Trigger.dev Cloud pour que
+# les jeux puissent se construire — ce conteneur est l'endroit où tout est
+# réuni (code + clés). Une fois par conteneur : un simple redémarrage ne
+# redéploie pas (marqueur), un nouveau déploiement Dokploy si.
+#
+# Les deux étapes tolèrent l'échec : elles loggent et laissent l'app démarrer.
+# Coupes possibles : DB_PUSH_ON_START=false, TRIGGER_DEPLOY_ON_START=false.
 set -e
 
 if [ "$DB_PUSH_ON_START" = "false" ]; then
@@ -21,6 +28,23 @@ else
     echo ">> Schéma appliqué."
   else
     echo "!! Échec du push du schéma — démarrage quand même (voir logs ci-dessus)"
+  fi
+fi
+
+if [ "$TRIGGER_DEPLOY_ON_START" = "false" ]; then
+  echo ">> TRIGGER_DEPLOY_ON_START=false — worker non déployé depuis ce conteneur"
+elif [ -z "$TRIGGER_SECRET_KEY" ] || [ -z "$TRIGGER_PROJECT_REF" ]; then
+  echo ">> TRIGGER_SECRET_KEY / TRIGGER_PROJECT_REF absents — worker non déployé"
+  echo ">> (sans worker, l'app tourne mais les jeux ne se construisent pas)"
+elif [ -f /tmp/.trigger-deployed ]; then
+  echo ">> Worker déjà déployé pour ce conteneur"
+else
+  echo ">> Déploiement du worker Trigger.dev…"
+  if CI=true npx trigger deploy; then
+    touch /tmp/.trigger-deployed
+    echo ">> Worker déployé."
+  else
+    echo "!! Échec du déploiement du worker — l'app démarre quand même (voir logs)"
   fi
 fi
 

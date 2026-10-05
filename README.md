@@ -102,16 +102,15 @@ Le code parle à l'endpoint **Anthropic-compatible** de z.ai (`https://api.z.ai/
 
 L'essentiel :
 
-- **Application** : Dokploy build le `Dockerfile` du repo (port 3000). Le schéma de la base est appliqué automatiquement au démarrage du conteneur (`docker-entrypoint.sh`, désactivable avec `DB_PUSH_ON_START=false`) — pas de commande manuelle.
-- **Worker Trigger.dev** : déployé **automatiquement par GitHub Action** (`.github/workflows/deploy-trigger.yml`) à chaque push sur `main` qui touche `trigger/`, `lib/` ou les dépendances. Rien à lancer en local : configurez une fois les secrets GitHub `TRIGGER_SECRET_KEY` et `TRIGGER_PROJECT_REF`, et les variables du worker (`DATABASE_URL` publique, `Z_AI_API_KEY`, `DAYTONA_API_KEY`) dans le dashboard Trigger.dev.
+- **Application** : Dokploy build le `Dockerfile` du repo (port 3000). Au démarrage du conteneur, deux choses se font toutes seules (`docker-entrypoint.sh`) : l'application du schéma à la base (`drizzle-kit push`), puis le **déploiement du worker Trigger.dev** (une fois par conteneur). Coupes possibles : `DB_PUSH_ON_START=false`, `TRIGGER_DEPLOY_ON_START=false`.
+- **Worker Trigger.dev** : le code de l'agent (`trigger/`) est envoyé à Trigger.dev Cloud par le conteneur au démarrage — rien à lancer en local, pas de GitHub Action. Les variables d'exécution du worker (`DATABASE_URL` publique, `Z_AI_API_KEY`, `DAYTONA_API_KEY`) se définissent dans le dashboard Trigger.dev.
 - **PostgreSQL** : service Dokploy, exposé publiquement (SSL + mot de passe long) pour que le worker cloud puisse le joindre.
 
 ### Résumé des variables
 
 | Où | Variables |
 | --- | --- |
-| Dokploy (application) | `DATABASE_URL` (interne), `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `Z_AI_API_KEY`, `DAYTONA_API_KEY`, Sentry (optionnel), `DB_PUSH_ON_START=false` (optionnel) |
-| GitHub (secrets) | `TRIGGER_SECRET_KEY`, `TRIGGER_PROJECT_REF`, `SENTRY_ORG` / `SENTRY_PROJECT` / `SENTRY_AUTH_TOKEN` (optionnel) |
+| Dokploy (application) | `DATABASE_URL` (interne), `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `Z_AI_API_KEY`, `DAYTONA_API_KEY`, `TRIGGER_SECRET_KEY`, `TRIGGER_PROJECT_REF`, Sentry + `DB_PUSH_ON_START`/`TRIGGER_DEPLOY_ON_START` (optionnels) |
 | Trigger.dev (worker) | `DATABASE_URL` (publique), `Z_AI_API_KEY`, `DAYTONA_API_KEY`, Sentry (optionnel) |
 
 ---

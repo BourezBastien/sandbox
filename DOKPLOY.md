@@ -6,13 +6,14 @@
 |---------|-------------|--------|------|
 | PostgreSQL | Database | Image intégrée Dokploy | 5432 (à exposer publiquement) |
 | Sandbox (app) | Application | GitHub → Dockerfile | 3000 |
-| Worker Trigger.dev | Cloud Trigger.dev | GitHub Action (auto sur push) | — |
+| Worker Trigger.dev | Cloud Trigger.dev | Déployé par le conteneur au démarrage | — |
 
 > L'agent qui construit les jeux tourne chez Trigger.dev (cloud), pas sur votre
-> serveur. Il a besoin de joindre PostgreSQL : c'est la seule raison pour
-> laquelle la base doit être **exposée publiquement** (SSL + mot de passe long).
-> Le déploiement du worker est automatique via GitHub Actions — rien à lancer
-> en local.
+> serveur. Le conteneur de l'application lui **envoie le code automatiquement
+> à chaque démarrage** (une fois par conteneur) — rien à lancer en local, pas
+> de GitHub Action. Il a besoin de joindre PostgreSQL : c'est la seule raison
+> pour laquelle la base doit être **exposée publiquement** (SSL + mot de passe
+> long).
 
 ---
 
@@ -20,7 +21,11 @@
 
 1. **Trigger.dev** : créez un projet sur [cloud.trigger.dev](https://cloud.trigger.dev)
    (plan Hobby $10/mois recommandé : 50 tours simultanés pour la classe).
-   Dans *Project Settings → Environment Variables*, ajoutez pour
+   Dans *Project Settings*, récupérez :
+   - la **Secret Key** (`TRIGGER_SECRET_KEY`)
+   - la **réf du projet** (`TRIGGER_PROJECT_REF`, ex. `proj_xxxxxxxxxxxx`)
+
+   Puis, dans *Project Settings → Environment Variables*, ajoutez pour
    l'environnement **production** :
 
    ```env
@@ -35,14 +40,6 @@
 
 3. **Daytona** : créez un compte sur [app.daytona.io](https://app.daytona.io)
    ($200 de crédits offerts) et copiez la clé API.
-
-4. **Secrets GitHub** : dans le repo → *Settings → Secrets and variables →
-   Actions*, ajoutez :
-
-   ```env
-   TRIGGER_SECRET_KEY=...      (Project Settings → Secret Key, chez Trigger.dev)
-   TRIGGER_PROJECT_REF=...     (la réf du projet, ex. proj_xxxxxxxxxxxx)
-   ```
 
 ---
 
@@ -97,6 +94,11 @@ Z_AI_API_KEY=
 # Daytona
 DAYTONA_API_KEY=
 
+# Worker Trigger.dev — déployé automatiquement par le conteneur au démarrage
+# (étape 0 : chez Trigger.dev, Project Settings)
+TRIGGER_SECRET_KEY=
+TRIGGER_PROJECT_REF=
+
 # Optionnel — Sentry
 # SENTRY_DSN=
 # SENTRY_ORG=
@@ -105,13 +107,21 @@ DAYTONA_API_KEY=
 # SENTRY_ENVIRONMENT=production
 ```
 
-> Le schéma de la base est **appliqué automatiquement au démarrage** du
-> conteneur (`drizzle-kit push`, voir `docker-entrypoint.sh`). Sur une base
-> vide, les tables sont créées avant la première requête. Pour désactiver :
-> `DB_PUSH_ON_START=false`.
+> Deux choses se font **automatiquement au démarrage du conteneur**
+> (`docker-entrypoint.sh`) : l'application du schéma de la base
+> (`drizzle-kit push`), puis le déploiement du worker Trigger.dev — une seule
+> fois par conteneur, pas à chaque redémarrage. Coupes possibles :
+> `DB_PUSH_ON_START=false`, `TRIGGER_DEPLOY_ON_START=false`.
 
-5. Cliquez **Deploy** (3-5 minutes de build)
-6. Vérifiez dans **Logs** : `>> Schéma appliqué.` puis le démarrage Next.js
+5. Cliquez **Deploy** (3-5 minutes de build, puis ~1-2 minutes d'entrypoint)
+6. Vérifiez dans **Logs** :
+
+   ```text
+   >> Application du schéma (drizzle-kit push)…
+   >> Schéma appliqué.
+   >> Déploiement du worker Trigger.dev…
+   >> Worker déployé.
+   ```
 
 ## Étape 5 — Domaine
 
@@ -119,15 +129,15 @@ DAYTONA_API_KEY=
 2. SSL automatique (Let's Encrypt)
 3. Mettez à jour `BETTER_AUTH_URL` avec cette adresse et redeployez
 
-## Étape 6 — Déployer le worker Trigger.dev
+## Étape 6 — Le worker Trigger.dev
 
-C'est **automatique** : chaque push sur `main` qui touche `trigger/`, `lib/`
-ou les dépendances déclenche l'action *Deploy Trigger.dev worker*
-(`.github/workflows/deploy-trigger.yml`), à condition que les secrets de
-l'étape 0 soient en place.
+Rien à faire : le conteneur l'a déployé au démarrage (étape 4, tant que
+`TRIGGER_SECRET_KEY` et `TRIGGER_PROJECT_REF` sont dans les variables).
 
-Vérifiez le premier run dans l'onglet **Actions** du repo, puis ouvrez
-cloud.trigger.dev : le task `game-chat` doit apparaître comme déployé.
+Vérifiez sur cloud.trigger.dev : le task **`game-chat`** doit apparaître comme
+déployé en production. Les variables d'exécution du worker (`DATABASE_URL`
+publique, `Z_AI_API_KEY`, `DAYTONA_API_KEY`) restent dans le dashboard
+Trigger.dev (étape 0) — c'est Trigger.dev qui les injecte dans ses runs.
 
 ## Étape 7 — Mise en service
 
@@ -153,9 +163,10 @@ curl -I https://sandbox.votre-domaine.fr
 | Problème | Solution |
 |----------|----------|
 | Logs : `Échec du push du schéma` | Vérifiez `DATABASE_URL` (doit pointer vers `sandbox-db`) |
+| Logs : `TRIGGER_SECRET_KEY / TRIGGER_PROJECT_REF absents` | Ajoutez-les dans l'onglet Environment, puis redeployez |
+| Logs : `Échec du déploiement du worker` | Vérifiez les deux valeurs Trigger.dev (Project Settings) — le conteneur a démarré quand même, redeployez après correction |
 | `/install` redirige vers `/sign-in` | Un admin existe déjà — la base n'est pas vide |
 | Erreur 500 au premier tour de jeu | Vérifiez `Z_AI_API_KEY` (app) **et** chez Trigger.dev |
 | `Game has no sandbox yet` persistant | Vérifiez `DAYTONA_API_KEY` chez Trigger.dev |
 | Le run Trigger échoue : connexion DB | Le worker utilise l'URL **publique** de la base (étape 2.3) |
-| Les jeux ne se construisent pas | Onglet Actions du repo : le workflow a-t-il tourné avec les secrets ? |
 | Cookie de session rejeté | `BETTER_AUTH_URL` doit être exactement l'URL publique finale |

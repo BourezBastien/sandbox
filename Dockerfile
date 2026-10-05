@@ -30,7 +30,8 @@ WORKDIR /app
 
 # `npm start` a besoin de la sortie du build et des fichiers que Next lit au
 # démarrage ; l'entrypoint a besoin de drizzle.config.ts + lib/db pour le push
-# du schéma.
+# du schéma, et de trigger/ + lib/ + tsconfig.json pour déployer le worker
+# Trigger.dev depuis le conteneur.
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/.next ./.next
 COPY --from=build /app/public ./public
@@ -40,8 +41,11 @@ COPY --from=build /app/instrumentation.ts ./instrumentation.ts
 COPY --from=build /app/instrumentation-client.ts ./instrumentation-client.ts
 COPY --from=build /app/sentry.server.config.ts ./sentry.server.config.ts
 COPY --from=build /app/sentry.edge.config.ts ./sentry.edge.config.ts
+COPY --from=build /app/tsconfig.json ./tsconfig.json
 COPY --from=build /app/drizzle.config.ts ./drizzle.config.ts
-COPY --from=build /app/lib/db ./lib/db
+COPY --from=build /app/lib ./lib
+COPY --from=build /app/trigger ./trigger
+COPY --from=build /app/trigger.config.ts ./trigger.config.ts
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
