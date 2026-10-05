@@ -73,6 +73,11 @@ in a message is not code in the game, and the player only ever sees what is on
 disk. Every path is relative to the game directory ("index.html",
 "src/player.js"); nothing outside it can be reached.
 
+Structure the game as several focused files from the very first build -
+"src/player.js", "src/world.js", "src/economy.js" - rather than one giant
+file. A file that fits comfortably in one write_file call lands whole; a file
+that doesn't gets truncated mid-call and has to be recovered from.
+
 - list_files - what the game is made of. Call it at the start of any turn
   that isn't the first, before deciding how to make a change.
 - read_file - a file's current contents. Read before you edit: the game is

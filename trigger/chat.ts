@@ -215,6 +215,11 @@ export const gameChat = chat.agent({
       // per-chat or dashboard-versioned part of it to resolve in a hook.
       instructions: gameInstructions,
       messages,
+      // A game file easily runs past the provider's 4096-token default, and a
+      // write_file call that doesn't fit is truncated mid-JSON: the tool dies
+      // with an error and the model has to recover by splitting its work.
+      // Room to write a whole file in one call costs nothing when unused.
+      maxOutputTokens: 32768,
       // Fires on stop and on cancel. Without it, Stop only updates the UI.
       abortSignal: signal,
       stopWhen: stepCountIs(MAX_STEPS),
