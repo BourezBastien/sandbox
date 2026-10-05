@@ -1,10 +1,11 @@
 "use server"
 
 import * as Sentry from "@sentry/nextjs"
-import { eq, inArray } from "drizzle-orm"
+import { and, eq, inArray, isNull } from "drizzle-orm"
 import { headers } from "next/headers"
 import { refresh } from "next/cache"
 
+import { actorLabelFor, recordAudit } from "@/lib/audit"
 import { auth, getSession } from "@/lib/auth"
 import { db, games, user } from "@/lib/db"
 import { deleteGameSandboxes } from "@/lib/daytona/utils"
@@ -198,6 +199,12 @@ export async function createStudentAccount(input: {
     throw new Error("That username is already taken.")
   }
 
+  await recordAudit({
+    action: "user.created",
+    targetType: "user",
+    detail: `Compte élève : ${prepared.username}`,
+  })
+
   refresh()
 }
 
@@ -228,6 +235,12 @@ export async function resetUserPassword(input: {
   await auth.api.revokeUserSessions({
     body: { userId: input.userId },
     headers: await headers(),
+  })
+
+  await recordAudit({
+    action: "user.password_reset",
+    targetType: "user",
+    targetId: input.userId,
   })
 }
 
@@ -275,6 +288,12 @@ export async function banUserAccount(input: {
     "game.count": owned.length,
   })
 
+  await recordAudit({
+    action: "user.banned",
+    targetType: "user",
+    targetId: input.userId,
+  })
+
   refresh()
 }
 
@@ -288,6 +307,12 @@ export async function unbanUserAccount(input: { userId: string }) {
   await auth.api.unbanUser({
     body: { userId: input.userId },
     headers: await headers(),
+  })
+
+  await recordAudit({
+    action: "user.unbanned",
+    targetType: "user",
+    targetId: input.userId,
   })
 
   refresh()
@@ -314,17 +339,26 @@ export async function forceSignOut(input: { userId: string }) {
     headers: await headers(),
   })
 
+  await recordAudit({
+    action: "user.force_signed_out",
+    targetType: "user",
+    targetId: input.userId,
+  })
+
   refresh()
 }
 
 /**
- * Deletes an account, its games, and everything Daytona is holding for them.
+ * Removes an account, cleans up everything Daytona is holding for its games,
+ * and archives the games themselves.
  *
- * The per-game cleanup is the delete-game path in miniature - end the chat
- * session (a turn left streaming would keep calling tools against a game that
- * no longer exists), then the sandboxes, then the row. Failures on individual
- * games are logged and swallowed: the account is going either way, and an
- * orphaned sandbox is cleaner than an admin who cannot remove a student.
+ * The games are soft-deleted with the owner's name snapshotted onto each row:
+ * the records - threads and messages included - outlive the account, exactly
+ * like a deleted game outlives its sandbox. The per-game cleanup (chat
+ * session, sandboxes) is the delete-game path in miniature; failures on
+ * individual games are logged and swallowed: the account is going either way,
+ * and an orphaned sandbox is cleaner than an admin who cannot remove a
+ * student.
  */
 export async function removeUserAccount(input: { userId: string }) {
   await requireAdmin()
@@ -336,10 +370,22 @@ export async function removeUserAccount(input: { userId: string }) {
     throw new Error("You cannot delete your own admin account.")
   }
 
+  // The snapshot is written before the account goes, so the trace names a
+  // person rather than an id nothing resolves anymore.
+  const [target] = await db
+    .select({ name: user.name, username: user.username })
+    .from(user)
+    .where(eq(user.id, input.userId))
+    .limit(1)
+
+  const ownerSnapshot = target
+    ? `Compte supprimé : ${actorLabelFor(target)}`
+    : "Compte supprimé"
+
   const owned = await db
     .select({ id: games.id, sandboxId: games.sandboxId })
     .from(games)
-    .where(eq(games.userId, input.userId))
+    .where(and(eq(games.userId, input.userId), isNull(games.deletedAt)))
 
   for (const game of owned) {
     try {
@@ -360,12 +406,15 @@ export async function removeUserAccount(input: { userId: string }) {
   }
 
   if (owned.length > 0) {
-    await db.delete(games).where(
-      inArray(
-        games.id,
-        owned.map(({ id }) => id)
+    await db
+      .update(games)
+      .set({ deletedAt: new Date(), ownerSnapshot })
+      .where(
+        inArray(
+          games.id,
+          owned.map(({ id }) => id)
+        )
       )
-    )
   }
 
   await auth.api.removeUser({
@@ -377,6 +426,13 @@ export async function removeUserAccount(input: { userId: string }) {
     "app.action": "removeUserAccount",
     "user.id": input.userId,
     "game.count": owned.length,
+  })
+
+  await recordAudit({
+    action: "user.deleted",
+    targetType: "user",
+    targetId: input.userId,
+    detail: `${ownerSnapshot} ; ${owned.length} jeu(x) archivé(s)`,
   })
 
   refresh()

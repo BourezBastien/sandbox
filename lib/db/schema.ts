@@ -127,6 +127,13 @@ export const games = pgTable(
     // The Daytona sandbox the game is built in, created on the thread's first
     // turn. Null until then, and for games created before sandboxes existed.
     sandboxId: text("sandbox_id"),
+    // Soft delete: the row and its whole message thread survive deletion (a
+    // school keeps its records), while everything outside the database - the
+    // Trigger.dev chat session, the Daytona sandbox - really goes away.
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+    // Who owned this game, written down when their account is removed and the
+    // live user row disappears. Null while the owner still exists.
+    ownerSnapshot: text("owner_snapshot"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .default(sql`now()`),
@@ -144,6 +151,39 @@ export const games = pgTable(
     ),
   ]
 )
+
+/**
+ * The activity journal: one row per event worth keeping a record of - games
+ * created, renamed or deleted, turns played, accounts created, blocked,
+ * unblocked, reset or removed.
+ *
+ * `actorLabel` is denormalized on purpose: the trace must outlive the account
+ * it names, the same way a game's owner snapshot does.
+ */
+export const auditLog = pgTable(
+  "audit_log",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+    // Who did it. Null for events with no signed-in actor (the worker).
+    actorId: text("actor_id"),
+    actorLabel: text("actor_label").notNull(),
+    // One of the ACTIONS keys in `@/lib/audit`.
+    action: text("action").notNull(),
+    // "game" or "user", with the row's id.
+    targetType: text("target_type"),
+    targetId: text("target_id"),
+    // A short human-readable line: the game title, the username, the message
+    // count. Never the message content itself - that lives on the game row.
+    detail: text("detail"),
+  },
+  (table) => [index("audit_log_created_at_idx").on(table.createdAt.desc())]
+)
+
+export type AuditLogEntry = typeof auditLog.$inferSelect
+export type NewAuditLogEntry = typeof auditLog.$inferInsert
 
 export type Game = typeof games.$inferSelect
 export type NewGame = typeof games.$inferInsert

@@ -3,6 +3,7 @@ import { stepCountIs, streamText } from "ai"
 import { z } from "zod"
 
 import { createGameSandbox } from "@/lib/daytona/utils"
+import { recordGameTurn } from "@/lib/audit"
 import { gameModelSettings } from "@/lib/games/agent"
 import {
   loadGameMessages,
@@ -160,6 +161,12 @@ export const gameChat = chat.agent({
       "chat.has_cursor": lastEventId !== undefined,
       duration_ms: elapsed(startedAt),
     })
+
+    // One journal line per finished turn, naming the student. Never allowed
+    // to fail the turn: the thread itself is already saved above, and the
+    // journal swallowing an error is a better outcome than a build that dies
+    // after the work is done.
+    await recordGameTurn(chatId, uiMessages.length)
   },
   // Resolved per turn rather than declared once, because the tools have to
   // write into this game's sandbox: the chat id is the game id, so each turn's

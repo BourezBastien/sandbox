@@ -1,6 +1,6 @@
 import "server-only"
 
-import { and, desc, eq } from "drizzle-orm"
+import { and, desc, eq, isNull } from "drizzle-orm"
 
 import { db, games, type Game } from "@/lib/db"
 import { getSession } from "@/lib/auth"
@@ -20,6 +20,9 @@ async function currentUser() {
 /**
  * Games belonging to the caller, newest first.
  *
+ * Deleted games are gone from here the way the student expects, while their
+ * rows live on in the database for the records.
+ *
  * An admin sees their own games here, same as a student - the sidebar is a
  * personal recents list. Everything a game belongs to is on `/admin/games`.
  */
@@ -35,7 +38,7 @@ export async function listGames(): Promise<Game[]> {
   return db
     .select()
     .from(games)
-    .where(eq(games.userId, user.id))
+    .where(and(eq(games.userId, user.id), isNull(games.deletedAt)))
     .orderBy(desc(games.createdAt))
 }
 
@@ -50,7 +53,9 @@ const UUID_RE =
  *
  * The one exception is the admin: every game is theirs to open - watching a
  * student's build in progress is the point of the admin pages, and the preview
- * route and chat tokens authorize through this same lookup.
+ * route and chat tokens authorize through this same lookup. That includes
+ * deleted games, so a thread stays readable for the records even after the
+ * sandbox behind it is gone.
  */
 export async function getGame(id: string): Promise<Game | undefined> {
   const user = await currentUser()
@@ -59,15 +64,19 @@ export async function getGame(id: string): Promise<Game | undefined> {
     return undefined
   }
 
+  const isAdmin = user.role === "admin"
+
   const [game] = await db
     .select()
     .from(games)
     .where(
       and(
         eq(games.id, id),
-        // `and` drops the undefined entry, so a student's lookup stays scoped
-        // to their own rows while the admin's has no owner filter at all.
-        user.role === "admin" ? undefined : eq(games.userId, user.id)
+        // `and` drops the undefined entries, so a student's lookup stays
+        // scoped to their own live rows while the admin's sees everything,
+        // deleted included.
+        isAdmin ? undefined : eq(games.userId, user.id),
+        isAdmin ? undefined : isNull(games.deletedAt)
       )
     )
     .limit(1)

@@ -54,6 +54,7 @@ flowchart LR
 - **Admin** : créé une fois pour toutes sur `/install` au premier déploiement. Gère les comptes (`/admin/users`), voit et ouvre tous les jeux (`/admin/games`), bloque en temps réel.
 - **Élève** : ne voit que ses propres jeux. Aucune auto-inscription : les comptes sont créés par l'admin.
 - **Blocage** : bloquer un compte révoque immédiatement toutes ses sessions (l'onglet ouvert est expulsé à la requête suivante), annule les constructions en cours, et l'agent refuse ses tours. Débloquer permet de se reconnecter avec tout en place.
+- **Traçabilité** : rien ne disparaît vraiment. Un jeu supprimé part en corbeille (son fil de discussion complet reste en base, lisible depuis l'admin), et chaque événement (jeu créé, renommé, supprimé, tour joué, compte créé, bloqué, réinitialisé, supprimé) laisse une ligne dans le journal d'activité (`/admin/activity`). Les nettoyages externes (session Trigger.dev, bac à sable Daytona) continuent normalement : seule la base conserve l'historique.
 - Les mots de passe sont hachés (scrypt) par Better Auth ; la connexion est limitée en rythme (anti-force brute) et les sessions sont revérifiées en base à chaque requête.
 
 ---

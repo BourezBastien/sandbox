@@ -109,8 +109,9 @@ export function CreateUserButton() {
             <DialogHeader>
               <DialogTitle>Nouveau compte élève</DialogTitle>
               <DialogDescription>
-                L&apos;élève se connecte avec cet identifiant et ce mot de passe. Ils
-                peuvent être modifiés plus tard depuis ce même tableau.
+                L&apos;élève se connecte avec cet identifiant et ce mot de
+                passe. Ils peuvent être modifiés plus tard depuis ce même
+                tableau.
               </DialogDescription>
             </DialogHeader>
             <Field>

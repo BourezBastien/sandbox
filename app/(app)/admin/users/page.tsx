@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 
+import { TablePagination } from "@/components/admin/table-pagination"
 import { CreateUserButton, UserActions } from "@/components/admin/user-actions"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -10,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { listUsersWithGameCounts } from "@/lib/admin/queries"
+import { USERS_PAGE_SIZE, listUsersWithGameCounts } from "@/lib/admin/queries"
 
 export const metadata: Metadata = {
   title: "Comptes",
@@ -25,8 +26,18 @@ const DATE_FORMAT = new Intl.DateTimeFormat("fr-FR", {
   minute: "2-digit",
 })
 
-export default async function AdminUsersPage() {
-  const users = await listUsersWithGameCounts()
+export default async function AdminUsersPage({
+  searchParams,
+}: PageProps<"/admin/users">) {
+  const params = await searchParams
+  const page = Math.max(1, Number(params.page) || 1)
+
+  const { rows, total } = await listUsersWithGameCounts({ page })
+  const pageCount = Math.max(1, Math.ceil(total / USERS_PAGE_SIZE))
+
+  function href(next: number) {
+    return next > 1 ? `/admin/users?page=${next}` : "/admin/users"
+  }
 
   return (
     <div className="flex min-h-svh flex-col">
@@ -34,16 +45,16 @@ export default async function AdminUsersPage() {
         <span className="font-heading text-sm font-medium">Comptes</span>
         <CreateUserButton />
       </header>
-      <div className="mx-auto w-full max-w-5xl px-6 py-10">
+      <div className="mx-auto w-full max-w-6xl px-6 py-10">
         <h1 className="text-2xl font-semibold tracking-tight">
-          {users.length === 1 ? "1 compte" : `${users.length} comptes`}
+          {total === 1 ? "1 compte" : `${total} comptes`}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Les comptes se connectent avec l&apos;identifiant et le mot de passe
           définis ici. Bloquer un compte le déconnecte immédiatement.
         </p>
 
-        <div className="mt-8 overflow-hidden rounded-lg border">
+        <div className="mt-8 overflow-x-auto rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -57,11 +68,11 @@ export default async function AdminUsersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user) => (
+              {rows.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell className="font-medium">{user.name}</TableCell>
                   <TableCell className="text-muted-foreground">
-                    {user.username ?? "-"}
+                    {user.username ?? ""}
                   </TableCell>
                   <TableCell>
                     {user.role === "admin" ? (
@@ -96,6 +107,8 @@ export default async function AdminUsersPage() {
             </TableBody>
           </Table>
         </div>
+
+        <TablePagination page={page} pageCount={pageCount} makeHref={href} />
       </div>
     </div>
   )

@@ -8,6 +8,7 @@ import { redirect } from "next/navigation"
 
 import { deleteGameSandboxes } from "@/lib/daytona/utils"
 import { db, games } from "@/lib/db"
+import { actorLabelFor, recordAudit } from "@/lib/audit"
 import { getSession } from "@/lib/auth"
 import { authorizeGame } from "@/lib/games/authorize"
 import { endGameChatSession } from "@/lib/games/chat-session"
@@ -130,11 +131,13 @@ export async function createGame(prompt: string, modelId: GameModelId) {
   // reachable by direct POST, and the value goes straight into the URL below.
   const model = isGameModelId(modelId) ? modelId : DEFAULT_GAME_MODEL_ID
 
+  const title = truncateTitle(await generateTitle(trimmedPrompt))
+
   const [game] = await db
     .insert(games)
     .values({
       userId,
-      title: truncateTitle(await generateTitle(trimmedPrompt)),
+      title,
       messages: [
         {
           id: generateMessageId(),
@@ -159,6 +162,15 @@ export async function createGame(prompt: string, modelId: GameModelId) {
     // a create that only a picker makes it possible to ask.
     "game.model": model,
     duration_ms: elapsed(startedAt),
+  })
+
+  await recordAudit({
+    actorId: userId,
+    actorLabel: actorLabelFor(session.user),
+    action: "game.created",
+    targetType: "game",
+    targetId: game.id,
+    detail: `Titre : ${title}`,
   })
 
   // The redirect below stays inside `app/(app)/layout.tsx`, so invalidate the
@@ -193,7 +205,7 @@ export async function createGame(prompt: string, modelId: GameModelId) {
  * and neither wants a failure it can act on.
  */
 export async function renameGame(gameId: string, title: string) {
-  const { game } = await authorizeGame(gameId, "renameGame")
+  const { game, userId } = await authorizeGame(gameId, "renameGame")
 
   const trimmed = typeof title === "string" ? truncateTitle(title.trim()) : ""
 
@@ -214,14 +226,27 @@ export async function renameGame(gameId: string, title: string) {
     "title.length": trimmed.length,
   })
 
+  await recordAudit({
+    actorId: userId,
+    action: "game.renamed",
+    targetType: "game",
+    targetId: gameId,
+    detail: `Nouveau titre : ${trimmed}`,
+  })
+
   // The header on the game page and the sidebar's list are both server-rendered
   // from the row, so this is what puts the new name on screen.
   refresh()
 }
 
 /**
- * Deletes a game, everything Daytona is holding for it, and its chat session,
- * then returns to the home page.
+ * Deletes a game's chat session and everything Daytona is holding for it,
+ * then archives the row, and returns to the home page.
+ *
+ * The row is soft-deleted, never removed: a school keeps its records, so the
+ * thread and its messages stay in the database (readable from the admin's
+ * trash view) while everything that costs money or runs code - the chat
+ * session, the sandboxes - really goes away.
  *
  * The order is the whole of this function, and it is chosen so that no step can
  * leave a sandbox running that nothing will ever come back for:
@@ -229,14 +254,15 @@ export async function renameGame(gameId: string, title: string) {
  *  1. End the chat session, so no turn is mid-flight when the row goes and
  *     none can start after it.
  *  2. Delete the sandboxes. This is the step allowed to fail the whole action:
- *     it throws, the row survives, and the player can try again - a game they
- *     can still see is the only handle a retry has.
- *  3. Delete the row. From here on nothing can make another sandbox for this
- *     game: `getGameSandbox` reads the row first and throws without one.
+ *     it throws, the row survives unarchived, and the player can try again -
+ *     a game they can still see is the only handle a retry has.
+ *  3. Archive the row (`deletedAt`). From here on nothing can make another
+ *     sandbox for this game: `getGameSandbox` reads the row through queries
+ *     that stop at archived games.
  *  4. Sweep once more. A tool that read the row just before step 3 could have
  *     created a sandbox after step 2 looked; the sweep is by label, so it finds
- *     that one too. Failing here is only logged - the game is already gone, so
- *     there is nothing left for the player to retry.
+ *     that one too. Failing here is only logged - the game is already archived,
+ *     so there is nothing left for the player to retry.
  *
  * `returnHome` is the caller saying whether the page it is on belongs to the
  * game it just deleted. The menu is in the sidebar as well as the game header,
@@ -249,13 +275,22 @@ export async function deleteGame(gameId: string, returnHome: boolean) {
   const startedAt = performance.now()
   const { game, userId } = await authorizeGame(gameId, "deleteGame")
 
+  // Already archived: nothing left to clean up, and re-archiving would just
+  // move the date on a record that is meant to say when it happened.
+  if (game.deletedAt) {
+    return
+  }
+
   await endGameChatSession(gameId)
 
   const sandboxes = await deleteGameSandboxes(gameId, game.sandboxId)
 
   // By id alone: `authorizeGame` has already proved the caller owns this game
   // (or is the admin), and the admin's id is not the row's owner.
-  await db.delete(games).where(eq(games.id, gameId))
+  await db
+    .update(games)
+    .set({ deletedAt: new Date() })
+    .where(eq(games.id, gameId))
 
   try {
     await deleteGameSandboxes(gameId)
@@ -275,14 +310,21 @@ export async function deleteGame(gameId: string, returnHome: boolean) {
   }
 
   // The end of the funnel that starts with the create log above, and the only
-  // record that this game existed once the row is gone - which is why it
-  // carries the sandbox count rather than leaving that to the Daytona log.
+  // record of the cleanup - the row itself stays, journal and all.
   Sentry.logger.info(Sentry.logger.fmt`Deleted game ${gameId}`, {
     "app.action": "deleteGame",
     "game.id": gameId,
     "user.id": userId,
     "sandbox.deleted": sandboxes,
     duration_ms: elapsed(startedAt),
+  })
+
+  await recordAudit({
+    actorId: userId,
+    action: "game.deleted",
+    targetType: "game",
+    targetId: gameId,
+    detail: `Titre : ${game.title} ; ${sandboxes} bac(s) à sable supprimé(s)`,
   })
 
   // The sidebar lists this game on every page of the app, so wherever the
