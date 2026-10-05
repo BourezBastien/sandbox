@@ -70,11 +70,39 @@ async function debugFetch(
 }
 
 /**
- * z.ai's Anthropic-compatible layer turns thinking ON by default for the
- * reasoning models. Left as is: Claude Code talks to this endpoint the same
- * way, thinking included, and it streams fine - the failures that looked
- * like a thinking problem were the missing /v1 in the URL below.
+ * GLM-5.3 and GLM-5.3-Flash cannot have thinking disabled, but their thinking
+ * depth follows `reasoning_effort` - which z.ai defaults to `max`. For a game
+ * built through 48 tool-call steps, `max` buys depth nobody reads and costs
+ * 5-9 s before every first token. `low` keeps a short pass of reasoning and
+ * gives it back as speed. Only injected for the 5.3 family, per the API
+ * reference; other models keep their own behavior.
  */
+function withReasoningEffortLow(fetchFn: typeof fetch): typeof fetch {
+  return async (input, init) => {
+    if (typeof init?.body === "string") {
+      try {
+        const body = JSON.parse(init.body) as Record<string, unknown>
+
+        if (
+          body &&
+          typeof body === "object" &&
+          typeof body.model === "string" &&
+          body.model.startsWith("glm-5.3") &&
+          !("reasoning_effort" in body)
+        ) {
+          init = {
+            ...init,
+            body: JSON.stringify({ ...body, reasoning_effort: "low" }),
+          }
+        }
+      } catch {
+        // Not JSON, or not ours to touch: send it exactly as received.
+      }
+    }
+
+    return fetchFn(input, init)
+  }
+}
 
 const zai = createAnthropic({
   // The /v1 is not optional: the SDK appends "/messages" to the baseURL
@@ -92,12 +120,13 @@ const zai = createAnthropic({
   headers: process.env.Z_AI_API_KEY
     ? { Authorization: `Bearer ${process.env.Z_AI_API_KEY}` }
     : undefined,
-  fetch: process.env.Z_AI_DEBUG === "true" ? debugFetch : undefined,
+  fetch: withReasoningEffortLow(
+    process.env.Z_AI_DEBUG === "true" ? debugFetch : fetch
+  ),
 })
 
 export const gameModels = {
-  "glm-4.7-flashx": zai("glm-4.7-flashx"),
-  "glm-4.7": zai("glm-4.7"),
-  "glm-4.5-air": zai("glm-4.5-air"),
+  "glm-5.3-flash": zai("glm-5.3-flash"),
+  "glm-5.3": zai("glm-5.3"),
   "glm-4.7-flash": zai("glm-4.7-flash"),
 } satisfies Record<GameModelId, LanguageModel>

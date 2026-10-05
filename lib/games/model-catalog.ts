@@ -6,32 +6,27 @@
  * reads the API key - so a component that only needs to *name* a model never
  * drags either of those into the browser bundle.
  *
- * The ids are z.ai's own model ids rather than slugs of our own. There is one
- * provider behind all three and no versioning story to hide, so a second name
- * for each would only be a mapping to keep in step.
+ * The ids are z.ai's own. Per the Coding Plan docs, the subscription covers
+ * exactly glm-5.3 and glm-5.3-flash, and older ids (glm-4.7, glm-4.5-*) are
+ * rerouted to one of those two anyway - so the catalog names the real models.
  */
 export const GAME_MODELS = [
   {
-    id: "glm-4.7-flashx",
-    name: "GLM 4.7 FlashX",
+    id: "glm-5.3-flash",
+    name: "GLM 5.3 Flash",
     tagline:
-      "La vitesse du Flash, en file prioritaire. Quelques centimes par mois.",
+      "Rapide, inclus dans l'abonnement Coding Plan. Le choix de la classe.",
   },
   {
-    id: "glm-4.7",
-    name: "GLM 4.7",
+    id: "glm-5.3",
+    name: "GLM 5.3",
     tagline:
-      "Le plus doué, mais il réfléchit longtemps avant chaque réponse.",
-  },
-  {
-    id: "glm-4.5-air",
-    name: "GLM 4.5 Air",
-    tagline: "Intermédiaire, avec réflexion.",
+      "Le plus doué, inclus dans l'abonnement. Réfléchit avant chaque réponse.",
   },
   {
     id: "glm-4.7-flash",
     name: "GLM 4.7 Flash",
-    tagline: "Gratuit, mais en file d'attente : parfois 30 s de silence.",
+    tagline: "Le gratuit, pour une clé API à l'usage sans abonnement.",
   },
 ] as const
 
@@ -47,13 +42,12 @@ export type GameModelId = (typeof GAME_MODELS)[number]["id"]
 /**
  * What a turn runs on when nothing picked otherwise.
  *
- * FlashX, the paid flash: same family speed without the free tier's queue
- * (a 35-second wait for a first token was observed on the free flash), and
- * a few cents a month at classroom scale. The reasoning models think before
- * every answer (5 to 9 s, not reliably disable per z.ai's docs), so they
- * stay opt-in for big builds.
+ * glm-5.3-flash: the cheap half of what the Coding Plan subscription covers
+ * (per z.ai's devpack docs), so classroom usage draws on the paid plan rather
+ * than a pay-as-you-go balance that may not exist. The flagship glm-5.3 is
+ * one picker click away for big builds.
  */
-export const DEFAULT_GAME_MODEL_ID: GameModelId = "glm-4.7-flashx"
+export const DEFAULT_GAME_MODEL_ID: GameModelId = "glm-5.3-flash"
 
 /**
  * Whether a value names a model this app offers.
