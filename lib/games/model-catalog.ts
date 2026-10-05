@@ -12,19 +12,21 @@
  */
 export const GAME_MODELS = [
   {
+    id: "glm-4.7-flash",
+    name: "GLM 4.7 Flash",
+    tagline:
+      "Le plus rapide, et gratuit. Répond et construit sans attendre.",
+  },
+  {
     id: "glm-4.7",
     name: "GLM 4.7",
-    tagline: "Le plus doué. Parfait pour construire un jeu de zéro.",
+    tagline:
+      "Le plus doué, mais il réfléchit longtemps avant chaque réponse.",
   },
   {
     id: "glm-4.5-air",
     name: "GLM 4.5 Air",
     tagline: "Rapide et léger. Parfait pour améliorer un jeu qui tourne.",
-  },
-  {
-    id: "glm-4.7-flash",
-    name: "GLM 4.7 Flash",
-    tagline: "Le plus rapide, et gratuit. Parfait pour des petits réglages.",
   },
 ] as const
 
@@ -39,8 +41,13 @@ export type GameModelId = (typeof GAME_MODELS)[number]["id"]
 
 /**
  * What a turn runs on when nothing picked otherwise.
+ *
+ * Flash, not the flagship: z.ai turns thinking ON for the reasoning models
+ * and offers no way to turn it off, which adds 5 to 9 seconds before the
+ * first token of *every* step of a build. In a 30-minute class session,
+ * snappy beats brilliant - the heavier models stay one picker click away.
  */
-export const DEFAULT_GAME_MODEL_ID: GameModelId = "glm-4.7"
+export const DEFAULT_GAME_MODEL_ID: GameModelId = "glm-4.7-flash"
 
 /**
  * Whether a value names a model this app offers.
