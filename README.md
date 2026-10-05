@@ -110,7 +110,7 @@ L'essentiel :
 
 | Où | Variables |
 | --- | --- |
-| Dokploy (application) | `DATABASE_URL` (interne), `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `Z_AI_API_KEY`, `DAYTONA_API_KEY`, `TRIGGER_SECRET_KEY`, `TRIGGER_PROJECT_REF`, Sentry + `DB_PUSH_ON_START`/`TRIGGER_DEPLOY_ON_START` (optionnels) |
+| Dokploy (application) | `DATABASE_URL` (interne), `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `Z_AI_API_KEY`, `DAYTONA_API_KEY`, `TRIGGER_SECRET_KEY` (app → Trigger.dev), `TRIGGER_PROJECT_REF` + `TRIGGER_ACCESS_TOKEN` (déploiement du worker), Sentry + `DB_PUSH_ON_START`/`TRIGGER_DEPLOY_ON_START` (optionnels) |
 | Trigger.dev (worker) | `DATABASE_URL` (publique), `Z_AI_API_KEY`, `DAYTONA_API_KEY`, Sentry (optionnel) |
 
 ---

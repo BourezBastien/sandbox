@@ -21,11 +21,15 @@
 
 1. **Trigger.dev** : créez un projet sur [cloud.trigger.dev](https://cloud.trigger.dev)
    (plan Hobby $10/mois recommandé : 50 tours simultanés pour la classe).
-   Dans *Project Settings*, récupérez :
-   - la **Secret Key** (`TRIGGER_SECRET_KEY`)
-   - la **réf du projet** (`TRIGGER_PROJECT_REF`, ex. `proj_xxxxxxxxxxxx`)
+   Dans *Project Settings*, récupérez la **réf du projet**
+   (`TRIGGER_PROJECT_REF`, ex. `proj_xxxxxxxxxxxx`).
 
-   Puis, dans *Project Settings → Environment Variables*, ajoutez pour
+   Puis générez un **Personal Access Token** sur
+   [cloud.trigger.dev/account/tokens](https://cloud.trigger.dev/account/tokens)
+   (`TRIGGER_ACCESS_TOKEN`) — c'est ce qui authentifie le déploiement du
+   worker depuis le conteneur. Ne le partagez pas : c'est une clé de compte.
+
+   Enfin, dans *Project Settings → Environment Variables*, ajoutez pour
    l'environnement **production** :
 
    ```env
@@ -94,10 +98,12 @@ Z_AI_API_KEY=
 # Daytona
 DAYTONA_API_KEY=
 
-# Worker Trigger.dev — déployé automatiquement par le conteneur au démarrage
-# (étape 0 : chez Trigger.dev, Project Settings)
+# Worker Trigger.dev — déployé automatiquement par le conteneur au démarrage.
+# L'app parle à Trigger.dev avec TRIGGER_SECRET_KEY (clé du projet) ;
+# le déploiement du worker s'authentifie avec TRIGGER_ACCESS_TOKEN (clé de compte).
 TRIGGER_SECRET_KEY=
 TRIGGER_PROJECT_REF=
+TRIGGER_ACCESS_TOKEN=
 
 # Optionnel — Sentry
 # SENTRY_DSN=
@@ -163,8 +169,8 @@ curl -I https://sandbox.votre-domaine.fr
 | Problème | Solution |
 |----------|----------|
 | Logs : `Échec du push du schéma` | Vérifiez `DATABASE_URL` (doit pointer vers `sandbox-db`) |
-| Logs : `TRIGGER_SECRET_KEY / TRIGGER_PROJECT_REF absents` | Ajoutez-les dans l'onglet Environment, puis redeployez |
-| Logs : `Échec du déploiement du worker` | Vérifiez les deux valeurs Trigger.dev (Project Settings) — le conteneur a démarré quand même, redeployez après correction |
+| Logs : `TRIGGER_ACCESS_TOKEN / TRIGGER_PROJECT_REF absents` | Ajoutez-les dans l'onglet Environment, puis redeployez |
+| Logs : `Échec du déploiement du worker` | Vérifiez le token (cloud.trigger.dev/account/tokens) et la réf projet — le conteneur a démarré quand même, redeployez après correction |
 | `/install` redirige vers `/sign-in` | Un admin existe déjà — la base n'est pas vide |
 | Erreur 500 au premier tour de jeu | Vérifiez `Z_AI_API_KEY` (app) **et** chez Trigger.dev |
 | `Game has no sandbox yet` persistant | Vérifiez `DAYTONA_API_KEY` chez Trigger.dev |

@@ -33,9 +33,10 @@ fi
 
 if [ "$TRIGGER_DEPLOY_ON_START" = "false" ]; then
   echo ">> TRIGGER_DEPLOY_ON_START=false — worker non déployé depuis ce conteneur"
-elif [ -z "$TRIGGER_SECRET_KEY" ] || [ -z "$TRIGGER_PROJECT_REF" ]; then
-  echo ">> TRIGGER_SECRET_KEY / TRIGGER_PROJECT_REF absents — worker non déployé"
+elif [ -z "$TRIGGER_ACCESS_TOKEN" ] || [ -z "$TRIGGER_PROJECT_REF" ]; then
+  echo ">> TRIGGER_ACCESS_TOKEN / TRIGGER_PROJECT_REF absents — worker non déployé"
   echo ">> (sans worker, l'app tourne mais les jeux ne se construisent pas)"
+  echo ">> (token : https://cloud.trigger.dev/account/tokens)"
 elif [ -f /tmp/.trigger-deployed ]; then
   echo ">> Worker déjà déployé pour ce conteneur"
 else
